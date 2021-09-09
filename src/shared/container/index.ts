@@ -4,6 +4,8 @@ import { IUsersRepository } from '@modules/accounts/repositories/IUsersRepositor
 import { IUsersTokensRepository } from '@modules/accounts/repositories/IUsersTokensRepository';
 import { ContactsRepository } from '@modules/contacts/infra/typeorm/repositories/ContactsRepository';
 import { IContactsRepository } from '@modules/contacts/repositories/IContactsRepository';
+import { LoansRepository } from '@modules/loans/infra/typeorm/repositories/LoansRepository';
+import { ILoansRepository } from '@modules/loans/repositories/ILoansRepository';
 import { container } from 'tsyringe';
 import '@shared/container/providers';
 
@@ -20,4 +22,9 @@ container.registerSingleton<IUsersTokensRepository>(
 container.registerSingleton<IContactsRepository>(
   'ContactsRepository',
   ContactsRepository
+);
+
+container.registerSingleton<ILoansRepository>(
+  'LoansRepository',
+  LoansRepository
 );
