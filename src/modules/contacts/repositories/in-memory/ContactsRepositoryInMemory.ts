@@ -29,6 +29,12 @@ class ContactsRepositoryInMemory implements IContactsRepository {
     return contact;
   }
 
+  async deleteById(id: string): Promise<void> {
+    const index = this.contacts.findIndex((contact) => contact.id === id);
+
+    this.contacts.splice(index, 1);
+  }
+
   async findById(id: string): Promise<Contact> {
     const contact = this.contacts.find((contact) => contact.id === id);
 

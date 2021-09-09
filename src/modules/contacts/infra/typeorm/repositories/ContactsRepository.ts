@@ -29,6 +29,10 @@ class ContactsRepository implements IContactsRepository {
     return contact;
   }
 
+  async deleteById(id: string): Promise<void> {
+    await this.repository.delete({ id });
+  }
+
   async findById(id: string): Promise<Contact> {
     const contact = await this.repository.findOne({ id });
 
