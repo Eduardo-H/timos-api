@@ -47,6 +47,22 @@ class ContactsRepository implements IContactsRepository {
 
     return contact;
   }
+
+  async listContacts(
+    user_id: string,
+    page: number,
+    limit: number
+  ): Promise<Contact[]> {
+    const start = (page - 1) * limit;
+
+    const contacts = await this.repository.find({
+      where: { user_id },
+      skip: start,
+      take: limit
+    });
+
+    return contacts;
+  }
 }
 
 export { ContactsRepository };

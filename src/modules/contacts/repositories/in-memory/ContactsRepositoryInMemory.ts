@@ -48,6 +48,20 @@ class ContactsRepositoryInMemory implements IContactsRepository {
 
     return contact;
   }
+
+  async listContacts(
+    user_id: string,
+    page: number,
+    limit: number
+  ): Promise<Contact[]> {
+    const start = (page - 1) * limit;
+
+    const contacts = this.contacts
+      .filter((contact) => contact.user_id === user_id)
+      .slice(start, start + limit);
+
+    return contacts;
+  }
 }
 
 export { ContactsRepositoryInMemory };

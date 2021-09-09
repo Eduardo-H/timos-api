@@ -7,6 +7,11 @@ interface IContactsRepository {
   deleteById(id: string): Promise<void>;
   findById(id: string): Promise<Contact>;
   findByName(name: string, user_id: string): Promise<Contact>;
+  listContacts(
+    user_id: string,
+    page: number,
+    limit: number
+  ): Promise<Contact[]>;
 }
 
 export { IContactsRepository };
