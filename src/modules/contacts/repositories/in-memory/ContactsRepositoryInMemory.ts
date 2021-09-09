@@ -23,7 +23,8 @@ class ContactsRepositoryInMemory implements IContactsRepository {
     const contact = this.contacts.find((contact) => contact.id === id);
 
     Object.assign(contact, {
-      name
+      name,
+      updated_at: new Date()
     });
 
     return contact;

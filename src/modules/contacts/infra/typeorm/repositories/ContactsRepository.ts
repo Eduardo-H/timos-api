@@ -23,6 +23,7 @@ class ContactsRepository implements IContactsRepository {
     const contact = await this.repository.findOne({ id });
 
     contact.name = name;
+    contact.updated_at = new Date();
 
     await this.repository.save(contact);
 
@@ -58,7 +59,8 @@ class ContactsRepository implements IContactsRepository {
     const contacts = await this.repository.find({
       where: { user_id },
       skip: start,
-      take: limit
+      take: limit,
+      order: { created_at: 'ASC' }
     });
 
     return contacts;
