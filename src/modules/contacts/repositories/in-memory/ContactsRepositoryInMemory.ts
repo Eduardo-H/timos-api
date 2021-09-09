@@ -19,6 +19,22 @@ class ContactsRepositoryInMemory implements IContactsRepository {
     return contact;
   }
 
+  async update(id: string, name: string): Promise<Contact> {
+    const contact = this.contacts.find((contact) => contact.id === id);
+
+    Object.assign(contact, {
+      name
+    });
+
+    return contact;
+  }
+
+  async findById(id: string): Promise<Contact> {
+    const contact = this.contacts.find((contact) => contact.id === id);
+
+    return contact;
+  }
+
   async findByName(name: string, user_id: string): Promise<Contact> {
     const contact = this.contacts.find(
       (contact) => contact.name === name && contact.user_id === user_id

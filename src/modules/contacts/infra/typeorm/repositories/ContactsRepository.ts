@@ -19,6 +19,22 @@ class ContactsRepository implements IContactsRepository {
     return contact;
   }
 
+  async update(id: string, name: string): Promise<Contact> {
+    const contact = await this.repository.findOne({ id });
+
+    contact.name = name;
+
+    await this.repository.save(contact);
+
+    return contact;
+  }
+
+  async findById(id: string): Promise<Contact> {
+    const contact = await this.repository.findOne({ id });
+
+    return contact;
+  }
+
   async findByName(name: string, user_id: string): Promise<Contact> {
     const contact = await this.repository.findOne({
       name,

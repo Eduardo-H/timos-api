@@ -1,4 +1,5 @@
 import { CreateContactController } from '@modules/contacts/useCases/createContact/CreateContactController';
+import { UpdateContactController } from '@modules/contacts/useCases/updateContact/UpdateContactController';
 import { Router } from 'express';
 
 import { ensureAuthenticated } from '../middlewares/ensureAuthenticated';
@@ -6,7 +7,9 @@ import { ensureAuthenticated } from '../middlewares/ensureAuthenticated';
 const contactsRoutes = Router();
 
 const createContactController = new CreateContactController();
+const updateContactController = new UpdateContactController();
 
 contactsRoutes.post('/', ensureAuthenticated, createContactController.handle);
+contactsRoutes.put('/', ensureAuthenticated, updateContactController.handle);
 
 export { contactsRoutes };

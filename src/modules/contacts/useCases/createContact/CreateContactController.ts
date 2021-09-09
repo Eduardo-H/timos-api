@@ -10,12 +10,12 @@ class CreateContactController {
 
     const createContactUseCase = container.resolve(CreateContactUseCase);
 
-    await createContactUseCase.execute({
+    const contact = await createContactUseCase.execute({
       name,
       user_id: id
     });
 
-    return response.status(201).send();
+    return response.status(201).json(contact);
   }
 }
 
