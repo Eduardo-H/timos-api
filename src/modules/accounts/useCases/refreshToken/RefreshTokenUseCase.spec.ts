@@ -6,7 +6,7 @@ import { JsonWebTokenError } from 'jsonwebtoken';
 import { DayjsDateProvider } from '@shared/container/providers/DateProvider/implementations/DayjsDateProvider';
 
 import { AuthenticateUserUseCase } from '../authenticateUser/AuthenticateUserUseCase';
-import { CreateUserUseCase } from '../createAccount/CreateUserUseCase';
+import { CreateUserUseCase } from '../createUser/CreateUserUseCase';
 import { RefreshTokenUseCase } from './RefreshTokenUseCase';
 
 let refreshTokenUseCase: RefreshTokenUseCase;
