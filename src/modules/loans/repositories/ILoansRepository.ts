@@ -20,6 +20,7 @@ interface ILoansRepository {
     closed_at,
     status
   }: IUpdateLoanDTO): Promise<Loan>;
+  deleteById(id: string): Promise<void>;
   findById(id: string): Promise<Loan>;
 }
 

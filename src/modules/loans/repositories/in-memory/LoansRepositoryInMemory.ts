@@ -57,6 +57,12 @@ class LoansRepositoryInMemory implements ILoansRepository {
     return loan;
   }
 
+  async deleteById(id: string): Promise<void> {
+    const index = this.loans.findIndex((loan) => loan.id === id);
+
+    this.loans.splice(index, 1);
+  }
+
   async findById(id: string): Promise<Loan> {
     const loan = this.loans.find((loan) => loan.id === id);
     return loan;
