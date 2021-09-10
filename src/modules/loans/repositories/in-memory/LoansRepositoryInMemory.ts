@@ -1,4 +1,5 @@
 import { ICreateLoanDTO } from '@modules/loans/dtos/ICreateLoanDTO';
+import { IUpdateLoanDTO } from '@modules/loans/dtos/IUpdateLoanDTO';
 import { Loan, Status } from '@modules/loans/infra/typeorm/entities/Loan';
 
 import { ILoansRepository } from '../ILoansRepository';
@@ -28,6 +29,36 @@ class LoansRepositoryInMemory implements ILoansRepository {
 
     this.loans.push(loan);
 
+    return loan;
+  }
+
+  async update({
+    id,
+    user_id,
+    contact_id,
+    value,
+    type,
+    limit_date,
+    closed_at,
+    status
+  }: IUpdateLoanDTO): Promise<Loan> {
+    const loan = this.loans.find((loan) => loan.id === id);
+
+    Object.assign(loan, {
+      user_id,
+      contact_id,
+      value,
+      type,
+      limit_date,
+      closed_at,
+      status
+    });
+
+    return loan;
+  }
+
+  async findById(id: string): Promise<Loan> {
+    const loan = this.loans.find((loan) => loan.id === id);
     return loan;
   }
 }
