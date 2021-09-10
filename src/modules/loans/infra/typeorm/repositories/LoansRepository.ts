@@ -3,7 +3,7 @@ import { IUpdateLoanDTO } from '@modules/loans/dtos/IUpdateLoanDTO';
 import { ILoansRepository } from '@modules/loans/repositories/ILoansRepository';
 import { getRepository, Repository } from 'typeorm';
 
-import { Loan, Status } from '../entities/Loan';
+import { Loan } from '../entities/Loan';
 
 class LoansRepository implements ILoansRepository {
   private repository: Repository<Loan>;
@@ -23,7 +23,7 @@ class LoansRepository implements ILoansRepository {
       user_id,
       contact_id,
       value,
-      status: Status.OPEN,
+      status: 'aberto',
       type,
       limit_date
     });

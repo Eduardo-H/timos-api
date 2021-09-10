@@ -1,4 +1,3 @@
-import { LoanType } from '@modules/loans/infra/typeorm/entities/Loan';
 import request from 'supertest';
 import { Connection, createConnection } from 'typeorm';
 
@@ -51,7 +50,7 @@ describe('Create Loan Controller', () => {
       .send({
         contact_id,
         value: 50,
-        type: LoanType.PAY,
+        type: 'pagar',
         limit_date: new Date('2030-06-01')
       })
       .set({
@@ -79,7 +78,7 @@ describe('Create Loan Controller', () => {
       .send({
         contact_id,
         value: 50,
-        type: LoanType.PAY,
+        type: 'pagar',
         limit_date: new Date('2030-06-01')
       })
       .set({
@@ -95,7 +94,7 @@ describe('Create Loan Controller', () => {
       .send({
         contact_id,
         value: -10,
-        type: LoanType.PAY,
+        type: 'pagar',
         limit_date: new Date('2030-06-01')
       })
       .set({
@@ -111,7 +110,7 @@ describe('Create Loan Controller', () => {
       .send({
         contact_id,
         value: 50,
-        type: LoanType.PAY,
+        type: 'pagar',
         limit_date: new Date('2030-06-01')
       })
       .set({
@@ -127,7 +126,7 @@ describe('Create Loan Controller', () => {
       .send({
         contact_id: '868272c3-c308-44e8-9a53-e0ccf61e9639',
         value: 50,
-        type: LoanType.PAY,
+        type: 'pagar',
         limit_date: new Date('2030-06-01')
       })
       .set({

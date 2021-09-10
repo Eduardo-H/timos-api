@@ -1,6 +1,6 @@
 import { ICreateLoanDTO } from '@modules/loans/dtos/ICreateLoanDTO';
 import { IUpdateLoanDTO } from '@modules/loans/dtos/IUpdateLoanDTO';
-import { Loan, Status } from '@modules/loans/infra/typeorm/entities/Loan';
+import { Loan } from '@modules/loans/infra/typeorm/entities/Loan';
 
 import { ILoansRepository } from '../ILoansRepository';
 
@@ -21,7 +21,7 @@ class LoansRepositoryInMemory implements ILoansRepository {
       contact_id,
       value,
       type,
-      status: Status.OPEN,
+      status: 'aberto',
       limit_date,
       created_at: new Date(),
       updated_at: new Date()

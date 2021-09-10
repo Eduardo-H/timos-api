@@ -2,7 +2,6 @@ import { UsersRepositoryInMemory } from '@modules/accounts/repositories/in-memor
 import { CreateUserUseCase } from '@modules/accounts/useCases/createUser/CreateUserUseCase';
 import { ContactsRepositoryInMemory } from '@modules/contacts/repositories/in-memory/ContactsRepositoryInMemory';
 import { CreateContactUseCase } from '@modules/contacts/useCases/createContact/CreateContactUseCase';
-import { LoanType } from '@modules/loans/infra/typeorm/entities/Loan';
 import { LoansRepositoryInMemory } from '@modules/loans/repositories/in-memory/LoansRepositoryInMemory';
 
 import { AppError } from '@shared/errors/AppError';
@@ -44,7 +43,7 @@ async function createLoans() {
     user_id: user.id,
     contact_id: contact.id,
     value: 50,
-    type: LoanType.PAY,
+    type: 'pagar',
     limit_date: new Date()
   });
 
@@ -52,7 +51,7 @@ async function createLoans() {
     user_id: user.id,
     contact_id: contact.id,
     value: 150,
-    type: LoanType.RECEIVE,
+    type: 'receber',
     limit_date: new Date()
   });
 
@@ -88,6 +87,7 @@ describe('List Loans', () => {
 
     expect(result.length).toBe(2);
     expect(result[0].user_id).toEqual(user_id);
+    expect(result[0].type).toEqual('pagar');
   });
 
   it('should return status code 204 when the user has no loans', async () => {

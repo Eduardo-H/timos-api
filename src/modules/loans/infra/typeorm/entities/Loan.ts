@@ -10,16 +10,6 @@ import {
 } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 
-export enum LoanType {
-  PAY = 'pagar',
-  RECEIVE = 'receber'
-}
-
-export enum Status {
-  OPEN = 'aberto',
-  PAYED = 'pago'
-}
-
 @Entity('loans')
 class Loan {
   @PrimaryColumn()
@@ -43,10 +33,10 @@ class Loan {
   value: number;
 
   @Column()
-  type: LoanType;
+  type: string;
 
   @Column()
-  status: Status;
+  status: string;
 
   @Column()
   limit_date: Date;

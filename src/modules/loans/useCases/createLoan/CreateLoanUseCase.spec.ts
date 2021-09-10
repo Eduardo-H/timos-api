@@ -2,7 +2,6 @@ import { UsersRepositoryInMemory } from '@modules/accounts/repositories/in-memor
 import { CreateUserUseCase } from '@modules/accounts/useCases/createUser/CreateUserUseCase';
 import { ContactsRepositoryInMemory } from '@modules/contacts/repositories/in-memory/ContactsRepositoryInMemory';
 import { CreateContactUseCase } from '@modules/contacts/useCases/createContact/CreateContactUseCase';
-import { LoanType, Status } from '@modules/loans/infra/typeorm/entities/Loan';
 import { LoansRepositoryInMemory } from '@modules/loans/repositories/in-memory/LoansRepositoryInMemory';
 
 import { AppError } from '@shared/errors/AppError';
@@ -59,7 +58,7 @@ describe('Create Loan', () => {
       user_id: user.id,
       contact_id: contact.id,
       value: 50,
-      type: LoanType.PAY,
+      type: 'pagar',
       limit_date: new Date()
     });
 
@@ -67,7 +66,7 @@ describe('Create Loan', () => {
     expect(result.user_id).toEqual(user.id);
     expect(result.contact_id).toEqual(contact.id);
     expect(result.value).toBe(50);
-    expect(result.status).toEqual(Status.OPEN);
+    expect(result.status).toEqual('aberto');
   });
 
   it("should not be able to create a loan with a contact that doesn't belong to the user", async () => {
@@ -81,7 +80,7 @@ describe('Create Loan', () => {
         user_id: otherUser.id,
         contact_id: contact.id,
         value: 50,
-        type: LoanType.PAY,
+        type: 'pagar',
         limit_date: new Date()
       })
     ).rejects.toEqual(
@@ -98,7 +97,7 @@ describe('Create Loan', () => {
         user_id: user.id,
         contact_id: contact.id,
         value: -10,
-        type: LoanType.PAY,
+        type: 'pagar',
         limit_date: new Date()
       })
     ).rejects.toEqual(new AppError('The value must be greater than 0'));
@@ -113,7 +112,7 @@ describe('Create Loan', () => {
         user_id: '123',
         contact_id: contact.id,
         value: 50,
-        type: LoanType.PAY,
+        type: 'pagar',
         limit_date: new Date()
       })
     ).rejects.toEqual(new AppError('User not found'));
@@ -127,7 +126,7 @@ describe('Create Loan', () => {
         user_id: user.id,
         contact_id: '123',
         value: 50,
-        type: LoanType.PAY,
+        type: 'pagar',
         limit_date: new Date()
       })
     ).rejects.toEqual(new AppError('Contact not found'));

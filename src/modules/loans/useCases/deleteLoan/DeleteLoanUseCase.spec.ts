@@ -2,7 +2,6 @@ import { UsersRepositoryInMemory } from '@modules/accounts/repositories/in-memor
 import { CreateUserUseCase } from '@modules/accounts/useCases/createUser/CreateUserUseCase';
 import { ContactsRepositoryInMemory } from '@modules/contacts/repositories/in-memory/ContactsRepositoryInMemory';
 import { CreateContactUseCase } from '@modules/contacts/useCases/createContact/CreateContactUseCase';
-import { LoanType } from '@modules/loans/infra/typeorm/entities/Loan';
 import { LoansRepositoryInMemory } from '@modules/loans/repositories/in-memory/LoansRepositoryInMemory';
 
 import { AppError } from '@shared/errors/AppError';
@@ -41,7 +40,7 @@ async function createLoan(user_id: string, contact_id: string) {
     user_id,
     contact_id,
     value: 50,
-    type: LoanType.PAY,
+    type: 'pagar',
     limit_date: new Date()
   });
 

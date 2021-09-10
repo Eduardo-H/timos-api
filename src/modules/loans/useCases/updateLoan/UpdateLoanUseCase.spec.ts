@@ -2,7 +2,6 @@ import { UsersRepositoryInMemory } from '@modules/accounts/repositories/in-memor
 import { CreateUserUseCase } from '@modules/accounts/useCases/createUser/CreateUserUseCase';
 import { ContactsRepositoryInMemory } from '@modules/contacts/repositories/in-memory/ContactsRepositoryInMemory';
 import { CreateContactUseCase } from '@modules/contacts/useCases/createContact/CreateContactUseCase';
-import { LoanType, Status } from '@modules/loans/infra/typeorm/entities/Loan';
 import { LoansRepositoryInMemory } from '@modules/loans/repositories/in-memory/LoansRepositoryInMemory';
 
 import { AppError } from '@shared/errors/AppError';
@@ -41,7 +40,7 @@ async function createLoan(user_id: string, contact_id: string) {
     user_id,
     contact_id,
     value: 50,
-    type: LoanType.PAY,
+    type: 'pagar',
     limit_date: new Date()
   });
 
@@ -81,7 +80,7 @@ describe('Update Loan', () => {
       user_id: loan.user_id,
       contact_id: loan.contact_id,
       value: 100,
-      type: LoanType.RECEIVE,
+      type: 'receber',
       limit_date: loan.limit_date,
       closed_at: loan.closed_at,
       status: loan.status
@@ -91,7 +90,7 @@ describe('Update Loan', () => {
     expect(result.user_id).toEqual(user.id);
     expect(result.contact_id).toEqual(contact.id);
     expect(result.value).toBe(100);
-    expect(result.type).toEqual(LoanType.RECEIVE);
+    expect(result.type).toEqual('receber');
   });
 
   it("should not be able to update a loan with a contact that doesn't belong to the user", async () => {
@@ -108,7 +107,7 @@ describe('Update Loan', () => {
         user_id: otherUser.id,
         contact_id: loan.contact_id,
         value: 100,
-        type: LoanType.RECEIVE,
+        type: 'receber',
         limit_date: loan.limit_date,
         closed_at: loan.closed_at,
         status: loan.status
@@ -129,7 +128,7 @@ describe('Update Loan', () => {
         user_id: loan.user_id,
         contact_id: loan.contact_id,
         value: -1000,
-        type: LoanType.RECEIVE,
+        type: 'receber',
         limit_date: loan.limit_date,
         closed_at: loan.closed_at,
         status: loan.status
@@ -147,10 +146,10 @@ describe('Update Loan', () => {
         user_id: user.id,
         contact_id: contact.id,
         value: 100,
-        type: LoanType.RECEIVE,
+        type: 'receber',
         limit_date: new Date(),
         closed_at: null,
-        status: Status.OPEN
+        status: 'aberto'
       })
     ).rejects.toEqual(new AppError('Loan not found'));
   });
@@ -166,7 +165,7 @@ describe('Update Loan', () => {
         user_id: '123',
         contact_id: loan.contact_id,
         value: 100,
-        type: LoanType.RECEIVE,
+        type: 'receber',
         limit_date: loan.limit_date,
         closed_at: loan.closed_at,
         status: loan.status
@@ -185,7 +184,7 @@ describe('Update Loan', () => {
         user_id: user.id,
         contact_id: '123',
         value: 50,
-        type: LoanType.RECEIVE,
+        type: 'receber',
         limit_date: loan.limit_date,
         closed_at: loan.closed_at,
         status: loan.status

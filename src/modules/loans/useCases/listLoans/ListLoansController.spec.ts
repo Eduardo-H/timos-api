@@ -1,4 +1,3 @@
-import { LoanType } from '@modules/loans/infra/typeorm/entities/Loan';
 import request from 'supertest';
 import { Connection, createConnection } from 'typeorm';
 
@@ -54,7 +53,7 @@ describe('List Loans Controller', () => {
       .send({
         contact_id,
         value: 50,
-        type: LoanType.PAY,
+        type: 'pagar',
         limit_date: new Date('2030-06-01')
       })
       .set({

@@ -1,4 +1,3 @@
-import { LoanType, Status } from '@modules/loans/infra/typeorm/entities/Loan';
 import request from 'supertest';
 import { Connection, createConnection } from 'typeorm';
 
@@ -45,7 +44,7 @@ describe('Update Loan Controller', () => {
       .send({
         contact_id,
         value: 50,
-        type: LoanType.PAY,
+        type: 'pagar',
         limit_date: new Date('2030-06-01')
       })
       .set({
@@ -67,10 +66,10 @@ describe('Update Loan Controller', () => {
         id: loan_id,
         contact_id,
         value: 100,
-        type: LoanType.RECEIVE,
+        type: 'receber',
         limit_date: new Date('2030-06-01'),
         closed_at: null,
-        status: Status.OPEN
+        status: 'aberto'
       })
       .set({
         Authorization: `Bearer ${refreshToken}`
@@ -98,10 +97,10 @@ describe('Update Loan Controller', () => {
         id: loan_id,
         contact_id,
         value: 100,
-        type: LoanType.RECEIVE,
+        type: 'receber',
         limit_date: new Date('2030-06-01'),
         closed_at: null,
-        status: Status.OPEN
+        status: 'aberto'
       })
       .set({
         Authorization: `Bearer ${refresh_token}`
@@ -117,10 +116,10 @@ describe('Update Loan Controller', () => {
         id: loan_id,
         contact_id,
         value: -100,
-        type: LoanType.RECEIVE,
+        type: 'receber',
         limit_date: new Date('2030-06-01'),
         closed_at: null,
-        status: Status.OPEN
+        status: 'aberto'
       })
       .set({
         Authorization: `Bearer ${refreshToken}`
@@ -136,10 +135,10 @@ describe('Update Loan Controller', () => {
         id: '868272c3-c308-44e8-9a53-e0ccf61e9639',
         contact_id,
         value: 100,
-        type: LoanType.RECEIVE,
+        type: 'receber',
         limit_date: new Date('2030-06-01'),
         closed_at: null,
-        status: Status.OPEN
+        status: 'aberto'
       })
       .set({
         Authorization: `Bearer ${refreshToken}`
@@ -155,10 +154,10 @@ describe('Update Loan Controller', () => {
         id: loan_id,
         contact_id,
         value: 100,
-        type: LoanType.RECEIVE,
+        type: 'receber',
         limit_date: new Date('2030-06-01'),
         closed_at: null,
-        status: Status.OPEN
+        status: 'aberto'
       })
       .set({
         Authorization: `Bearer ${wrongJWT}`
@@ -174,10 +173,10 @@ describe('Update Loan Controller', () => {
         id: loan_id,
         contact_id: '868272c3-c308-44e8-9a53-e0ccf61e9639',
         value: 100,
-        type: LoanType.RECEIVE,
+        type: 'receber',
         limit_date: new Date('2030-06-01'),
         closed_at: null,
-        status: Status.OPEN
+        status: 'aberto'
       })
       .set({
         Authorization: `Bearer ${refreshToken}`
