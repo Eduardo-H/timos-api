@@ -57,6 +57,11 @@ class LoansRepositoryInMemory implements ILoansRepository {
     return loan;
   }
 
+  async listByUserId(user_id: string): Promise<Loan[]> {
+    const loans = this.loans.filter((loan) => loan.user_id === user_id);
+    return loans;
+  }
+
   async deleteById(id: string): Promise<void> {
     const index = this.loans.findIndex((loan) => loan.id === id);
 

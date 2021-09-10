@@ -59,6 +59,13 @@ class LoansRepository implements ILoansRepository {
     return loan;
   }
 
+  async listByUserId(user_id: string): Promise<Loan[]> {
+    const loans = await this.repository.find({
+      where: { user_id }
+    });
+    return loans;
+  }
+
   async deleteById(id: string): Promise<void> {
     await this.repository.delete(id);
   }
