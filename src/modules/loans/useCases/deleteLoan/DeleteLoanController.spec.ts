@@ -2,6 +2,7 @@ import request from 'supertest';
 import { Connection, createConnection } from 'typeorm';
 
 import { app } from '@shared/infra/http/app';
+import { closeRedisConnection } from '@shared/infra/http/middlewares/rateLimiter';
 
 let connection: Connection;
 let refreshToken: string;
@@ -41,6 +42,7 @@ describe('Delete Loan Controller', () => {
   afterAll(async () => {
     await connection.dropDatabase();
     await connection.close();
+    closeRedisConnection();
   });
 
   it('should be able to delete a loan', async () => {
