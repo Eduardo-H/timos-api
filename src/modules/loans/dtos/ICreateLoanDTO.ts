@@ -1,10 +1,8 @@
-import { LoanType } from '../infra/typeorm/entities/Loan';
-
 interface ICreateLoanDTO {
   user_id: string;
   contact_id: string;
   value: number;
-  type: LoanType;
+  type: string;
   limit_date?: Date;
 }
 
