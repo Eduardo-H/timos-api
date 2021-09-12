@@ -10,6 +10,8 @@ import {
 } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 
+import { Payment } from './Payment';
+
 @Entity('loans')
 class Loan {
   @PrimaryColumn()
@@ -49,6 +51,12 @@ class Loan {
 
   @Column()
   updated_at: Date;
+
+  payments?: Payment[];
+
+  setPayments(payments: Payment[]): void {
+    this.payments = payments;
+  }
 
   constructor() {
     if (!this.id) {

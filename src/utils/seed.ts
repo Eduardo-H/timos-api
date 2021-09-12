@@ -53,7 +53,7 @@ async function createPayment(
   const payment = await createPaymentUseCase.execute({
     user_id,
     loan_id,
-    value: 100
+    value: 50
   });
   return payment;
 }
