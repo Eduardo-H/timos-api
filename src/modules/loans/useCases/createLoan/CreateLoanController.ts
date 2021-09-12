@@ -6,7 +6,7 @@ import { CreateLoanUseCase } from './CreateLoanUseCase';
 class CreateLoanController {
   async handle(request: Request, response: Response): Promise<Response> {
     const { id: user_id } = request.user;
-    const { contact_id, value, type, limit_date } = request.body;
+    const { contact_id, value, type, fee, limit_date } = request.body;
 
     const createLoanUseCase = container.resolve(CreateLoanUseCase);
 
@@ -15,6 +15,7 @@ class CreateLoanController {
       contact_id,
       value,
       type,
+      fee,
       limit_date
     });
 

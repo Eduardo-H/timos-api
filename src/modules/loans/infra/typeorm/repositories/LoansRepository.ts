@@ -17,12 +17,14 @@ class LoansRepository implements ILoansRepository {
     contact_id,
     value,
     type,
+    fee,
     limit_date
   }: ICreateLoanDTO): Promise<Loan> {
     const loan = this.repository.create({
       user_id,
       contact_id,
       value,
+      fee,
       status: 'aberto',
       type,
       limit_date

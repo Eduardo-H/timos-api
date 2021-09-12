@@ -6,6 +6,7 @@ import { LoansRepositoryInMemory } from '@modules/loans/repositories/in-memory/L
 import { PaymentsRepositoryInMemory } from '@modules/loans/repositories/in-memory/PaymentsRepositoryInMemory';
 import { createContact, createLoan, createUser } from '@utils/seed';
 
+import { DayjsDateProvider } from '@shared/container/providers/DateProvider/implementations/DayjsDateProvider';
 import { AppError } from '@shared/errors/AppError';
 
 import { CreateLoanUseCase } from '../createLoan/CreateLoanUseCase';
@@ -19,6 +20,7 @@ let paymentsRepositoryInMemory: PaymentsRepositoryInMemory;
 let usersRepositoryInMemory: UsersRepositoryInMemory;
 let contactsRepositoryInMemory: ContactsRepositoryInMemory;
 let loansRepositoryInMemory: LoansRepositoryInMemory;
+let dateProvider: DayjsDateProvider;
 
 let user_id: string;
 let loan_id: string;
@@ -29,6 +31,7 @@ describe('Create Payment', () => {
     usersRepositoryInMemory = new UsersRepositoryInMemory();
     contactsRepositoryInMemory = new ContactsRepositoryInMemory();
     loansRepositoryInMemory = new LoansRepositoryInMemory();
+    dateProvider = new DayjsDateProvider();
 
     createPaymentUseCase = new CreatePaymentUseCase(
       paymentsRepositoryInMemory,
@@ -39,7 +42,8 @@ describe('Create Payment', () => {
     createUserUseCase = new CreateUserUseCase(usersRepositoryInMemory);
     createLoanUseCase = new CreateLoanUseCase(
       loansRepositoryInMemory,
-      contactsRepositoryInMemory
+      contactsRepositoryInMemory,
+      dateProvider
     );
 
     const user = await createUser(createUserUseCase, 'test@example.com');
@@ -48,7 +52,12 @@ describe('Create Payment', () => {
       'John Doe',
       user.id
     );
-    const loan = await createLoan(createLoanUseCase, user.id, contact.id);
+    const loan = await createLoan(
+      createLoanUseCase,
+      user.id,
+      contact.id,
+      dateProvider.addMonths(2)
+    );
 
     user_id = user.id;
     loan_id = loan.id;

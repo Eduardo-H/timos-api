@@ -38,6 +38,9 @@ class Loan {
   type: string;
 
   @Column()
+  fee: number;
+
+  @Column()
   status: string;
 
   @Column()

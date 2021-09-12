@@ -62,6 +62,23 @@ describe('Create Loan Controller', () => {
     expect(response.statusCode).toBe(201);
   });
 
+  it('should be able to create a new loan with fee', async () => {
+    const response = await request(app)
+      .post('/loans')
+      .send({
+        contact_id,
+        value: 50,
+        type: 'pagar',
+        fee: 1,
+        limit_date: new Date('2030-06-01')
+      })
+      .set({
+        Authorization: `Bearer ${refreshToken}`
+      });
+
+    expect(response.statusCode).toBe(201);
+  });
+
   it("should not be able to create a loan with a contact that doesn't belong to the user", async () => {
     await request(app).post('/users').send({
       email: 'new@example.com',

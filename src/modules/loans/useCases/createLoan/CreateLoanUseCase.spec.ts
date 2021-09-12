@@ -5,6 +5,7 @@ import { CreateContactUseCase } from '@modules/contacts/useCases/createContact/C
 import { LoansRepositoryInMemory } from '@modules/loans/repositories/in-memory/LoansRepositoryInMemory';
 import { createContact, createUser } from '@utils/seed';
 
+import { DayjsDateProvider } from '@shared/container/providers/DateProvider/implementations/DayjsDateProvider';
 import { AppError } from '@shared/errors/AppError';
 
 import { CreateLoanUseCase } from './CreateLoanUseCase';
@@ -15,6 +16,7 @@ let createContactUseCase: CreateContactUseCase;
 let loansRepositoryInMemory: LoansRepositoryInMemory;
 let usersRepositoryInMemory: UsersRepositoryInMemory;
 let contactsRepositoryInMemory: ContactsRepositoryInMemory;
+let dateProvider: DayjsDateProvider;
 
 let user_id: string;
 let contact_id: string;
@@ -24,10 +26,12 @@ describe('Create Loan', () => {
     loansRepositoryInMemory = new LoansRepositoryInMemory();
     usersRepositoryInMemory = new UsersRepositoryInMemory();
     contactsRepositoryInMemory = new ContactsRepositoryInMemory();
+    dateProvider = new DayjsDateProvider();
 
     createLoanUseCase = new CreateLoanUseCase(
       loansRepositoryInMemory,
-      contactsRepositoryInMemory
+      contactsRepositoryInMemory,
+      dateProvider
     );
 
     createUserUseCase = new CreateUserUseCase(usersRepositoryInMemory);
@@ -50,13 +54,30 @@ describe('Create Loan', () => {
       contact_id,
       value: 50,
       type: 'pagar',
-      limit_date: new Date()
+      limit_date: dateProvider.addMonths(2)
     });
 
     expect(result).toHaveProperty('id');
     expect(result.user_id).toEqual(user_id);
     expect(result.contact_id).toEqual(contact_id);
     expect(result.value).toBe(50);
+    expect(result.status).toEqual('aberto');
+  });
+
+  it('should be able to create a loan with fee', async () => {
+    const result = await createLoanUseCase.execute({
+      user_id,
+      contact_id,
+      value: 1000,
+      type: 'pagar',
+      fee: 1,
+      limit_date: dateProvider.addMonths(2)
+    });
+
+    expect(result).toHaveProperty('id');
+    expect(result.user_id).toEqual(user_id);
+    expect(result.contact_id).toEqual(contact_id);
+    expect(result.value).toBe(1020);
     expect(result.status).toEqual('aberto');
   });
 
@@ -67,7 +88,7 @@ describe('Create Loan', () => {
         contact_id: '123',
         value: 50,
         type: 'pagar',
-        limit_date: new Date()
+        limit_date: dateProvider.addMonths(2)
       })
     ).rejects.toEqual(new AppError('Contact not found'));
   });
@@ -81,7 +102,7 @@ describe('Create Loan', () => {
         contact_id,
         value: 50,
         type: 'pagar',
-        limit_date: new Date()
+        limit_date: dateProvider.addMonths(2)
       })
     ).rejects.toEqual(
       new AppError('This contact does not belong to the user', 401)
@@ -95,7 +116,7 @@ describe('Create Loan', () => {
         contact_id,
         value: -10,
         type: 'pagar',
-        limit_date: new Date()
+        limit_date: dateProvider.addMonths(2)
       })
     ).rejects.toEqual(new AppError('The minimum loan value is 1'));
   });

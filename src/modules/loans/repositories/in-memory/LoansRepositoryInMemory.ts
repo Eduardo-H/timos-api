@@ -12,6 +12,7 @@ class LoansRepositoryInMemory implements ILoansRepository {
     contact_id,
     value,
     type,
+    fee,
     limit_date
   }: ICreateLoanDTO): Promise<Loan> {
     const loan = new Loan();
@@ -21,6 +22,7 @@ class LoansRepositoryInMemory implements ILoansRepository {
       contact_id,
       value,
       type,
+      fee,
       status: 'aberto',
       limit_date,
       created_at: new Date(),

@@ -8,6 +8,7 @@ interface ILoansRepository {
     contact_id,
     value,
     type,
+    fee,
     limit_date
   }: ICreateLoanDTO): Promise<Loan>;
 

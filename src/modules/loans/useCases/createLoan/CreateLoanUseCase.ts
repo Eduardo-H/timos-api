@@ -4,6 +4,7 @@ import { Loan } from '@modules/loans/infra/typeorm/entities/Loan';
 import { ILoansRepository } from '@modules/loans/repositories/ILoansRepository';
 import { inject, injectable } from 'tsyringe';
 
+import { IDateProvider } from '@shared/container/providers/DateProvider/IDateProvider';
 import { AppError } from '@shared/errors/AppError';
 
 @injectable()
@@ -12,7 +13,9 @@ class CreateLoanUseCase {
     @inject('LoansRepository')
     private loansRepository: ILoansRepository,
     @inject('ContactsRepository')
-    private contactsRepository: IContactsRepository
+    private contactsRepository: IContactsRepository,
+    @inject('DayjsDateProvider')
+    private dateProvider: IDateProvider
   ) {}
 
   async execute({
@@ -20,6 +23,7 @@ class CreateLoanUseCase {
     contact_id,
     value,
     type,
+    fee,
     limit_date
   }: ICreateLoanDTO): Promise<Loan> {
     const contact = await this.contactsRepository.findById(contact_id);
@@ -36,11 +40,25 @@ class CreateLoanUseCase {
       throw new AppError('The minimum loan value is 1');
     }
 
+    let finalValue = value;
+
+    if (fee && fee > 0) {
+      const monthlyFeeValue = value / (fee * 100);
+
+      const loanDurationInMonths = this.dateProvider.compareInMonths(
+        new Date(),
+        limit_date
+      );
+
+      finalValue += monthlyFeeValue * loanDurationInMonths;
+    }
+
     const loan = await this.loansRepository.create({
       user_id,
       contact_id: contact.id,
-      value,
+      value: finalValue,
       type,
+      fee,
       limit_date
     });
 

@@ -33,14 +33,15 @@ async function createContact(
 async function createLoan(
   createLoanUseCase: CreateLoanUseCase,
   user_id: string,
-  contact_id: string
+  contact_id: string,
+  limit_date: Date
 ): Promise<Loan> {
   const loan = await createLoanUseCase.execute({
     user_id,
     contact_id,
     value: 100,
     type: 'pagar',
-    limit_date: new Date('2030-06-01')
+    limit_date
   });
   return loan;
 }
