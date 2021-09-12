@@ -39,7 +39,6 @@ describe('Create Payment', () => {
     createUserUseCase = new CreateUserUseCase(usersRepositoryInMemory);
     createLoanUseCase = new CreateLoanUseCase(
       loansRepositoryInMemory,
-      usersRepositoryInMemory,
       contactsRepositoryInMemory
     );
 

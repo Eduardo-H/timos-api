@@ -41,7 +41,6 @@ describe('Create Loan', () => {
 
     createLoanUseCase = new CreateLoanUseCase(
       loansRepositoryInMemory,
-      usersRepositoryInMemory,
       contactsRepositoryInMemory
     );
 
@@ -67,6 +66,20 @@ describe('Create Loan', () => {
     expect(result.contact_id).toEqual(contact.id);
     expect(result.value).toBe(50);
     expect(result.status).toEqual('aberto');
+  });
+
+  it('should not be able to create a loan of a nonexistent contact', async () => {
+    const user = await createUser('test@example.com');
+
+    await expect(
+      createLoanUseCase.execute({
+        user_id: user.id,
+        contact_id: '123',
+        value: 50,
+        type: 'pagar',
+        limit_date: new Date()
+      })
+    ).rejects.toEqual(new AppError('Contact not found'));
   });
 
   it("should not be able to create a loan with a contact that doesn't belong to the user", async () => {
@@ -100,35 +113,6 @@ describe('Create Loan', () => {
         type: 'pagar',
         limit_date: new Date()
       })
-    ).rejects.toEqual(new AppError('The value must be greater than 0'));
-  });
-
-  it('should not be able to create a loan of a nonexistent user', async () => {
-    const user = await createUser('test@example.com');
-    const contact = await createContact(user.id);
-
-    await expect(
-      createLoanUseCase.execute({
-        user_id: '123',
-        contact_id: contact.id,
-        value: 50,
-        type: 'pagar',
-        limit_date: new Date()
-      })
-    ).rejects.toEqual(new AppError('User not found'));
-  });
-
-  it('should not be able to create a loan of a nonexistent contact', async () => {
-    const user = await createUser('test@example.com');
-
-    await expect(
-      createLoanUseCase.execute({
-        user_id: user.id,
-        contact_id: '123',
-        value: 50,
-        type: 'pagar',
-        limit_date: new Date()
-      })
-    ).rejects.toEqual(new AppError('Contact not found'));
+    ).rejects.toEqual(new AppError('The minimum loan value is 1'));
   });
 });

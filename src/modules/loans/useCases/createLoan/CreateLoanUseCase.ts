@@ -1,4 +1,3 @@
-import { IUsersRepository } from '@modules/accounts/repositories/IUsersRepository';
 import { IContactsRepository } from '@modules/contacts/repositories/IContactsRepository';
 import { ICreateLoanDTO } from '@modules/loans/dtos/ICreateLoanDTO';
 import { Loan } from '@modules/loans/infra/typeorm/entities/Loan';
@@ -12,8 +11,6 @@ class CreateLoanUseCase {
   constructor(
     @inject('LoansRepository')
     private loansRepository: ILoansRepository,
-    @inject('UsersRepository')
-    private usersRepository: IUsersRepository,
     @inject('ContactsRepository')
     private contactsRepository: IContactsRepository
   ) {}
@@ -25,28 +22,22 @@ class CreateLoanUseCase {
     type,
     limit_date
   }: ICreateLoanDTO): Promise<Loan> {
-    const user = await this.usersRepository.findById(user_id);
-
-    if (!user) {
-      throw new AppError('User not found');
-    }
-
     const contact = await this.contactsRepository.findById(contact_id);
 
     if (!contact) {
       throw new AppError('Contact not found');
     }
 
-    if (user.id !== contact.user_id) {
+    if (user_id !== contact.user_id) {
       throw new AppError('This contact does not belong to the user', 401);
     }
 
     if (value < 1) {
-      throw new AppError('The value must be greater than 0');
+      throw new AppError('The minimum loan value is 1');
     }
 
     const loan = await this.loansRepository.create({
-      user_id: user.id,
+      user_id,
       contact_id: contact.id,
       value,
       type,

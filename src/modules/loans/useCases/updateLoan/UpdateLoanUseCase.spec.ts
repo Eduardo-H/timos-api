@@ -55,13 +55,11 @@ describe('Update Loan', () => {
 
     updateLoanUseCase = new UpdateLoanUseCase(
       loansRepositoryInMemory,
-      usersRepositoryInMemory,
       contactsRepositoryInMemory
     );
 
     createLoanUseCase = new CreateLoanUseCase(
       loansRepositoryInMemory,
-      usersRepositoryInMemory,
       contactsRepositoryInMemory
     );
 
@@ -152,25 +150,6 @@ describe('Update Loan', () => {
         status: 'aberto'
       })
     ).rejects.toEqual(new AppError('Loan not found'));
-  });
-
-  it('should not be able to update a loan of a nonexistent user', async () => {
-    const user = await createUser('test@example.com');
-    const contact = await createContact(user.id);
-    const loan = await createLoan(user.id, contact.id);
-
-    await expect(
-      updateLoanUseCase.execute({
-        id: loan.id,
-        user_id: '123',
-        contact_id: loan.contact_id,
-        value: 100,
-        type: 'receber',
-        limit_date: loan.limit_date,
-        closed_at: loan.closed_at,
-        status: loan.status
-      })
-    ).rejects.toEqual(new AppError('User not found'));
   });
 
   it('should not be able to update a loan of a nonexistent contact', async () => {

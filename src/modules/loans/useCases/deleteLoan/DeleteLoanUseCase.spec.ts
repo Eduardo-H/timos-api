@@ -57,7 +57,6 @@ describe('Delete Loan', () => {
 
     createLoanUseCase = new CreateLoanUseCase(
       loansRepositoryInMemory,
-      usersRepositoryInMemory,
       contactsRepositoryInMemory
     );
 

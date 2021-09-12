@@ -1,4 +1,3 @@
-import { IUsersRepository } from '@modules/accounts/repositories/IUsersRepository';
 import { IContactsRepository } from '@modules/contacts/repositories/IContactsRepository';
 import { IUpdateLoanDTO } from '@modules/loans/dtos/IUpdateLoanDTO';
 import { Loan } from '@modules/loans/infra/typeorm/entities/Loan';
@@ -12,8 +11,6 @@ class UpdateLoanUseCase {
   constructor(
     @inject('LoansRepository')
     private loansRepository: ILoansRepository,
-    @inject('UsersRepository')
-    private usersRepository: IUsersRepository,
     @inject('ContactsRepository')
     private contactsRepository: IContactsRepository
   ) {}
@@ -34,19 +31,13 @@ class UpdateLoanUseCase {
       throw new AppError('Loan not found');
     }
 
-    const user = await this.usersRepository.findById(user_id);
-
-    if (!user) {
-      throw new AppError('User not found');
-    }
-
     const contact = await this.contactsRepository.findById(contact_id);
 
     if (!contact) {
       throw new AppError('Contact not found');
     }
 
-    if (user.id !== contact.user_id) {
+    if (user_id !== contact.user_id) {
       throw new AppError('This contact does not belong to the user', 401);
     }
 
@@ -56,7 +47,7 @@ class UpdateLoanUseCase {
 
     const updatedLoan = await this.loansRepository.update({
       id,
-      user_id: user.id,
+      user_id,
       contact_id: contact.id,
       value,
       type,

@@ -64,14 +64,10 @@ describe('List Loans', () => {
     usersRepositoryInMemory = new UsersRepositoryInMemory();
     contactsRepositoryInMemory = new ContactsRepositoryInMemory();
 
-    listLoansUseCase = new ListLoansUseCase(
-      loansRepositoryInMemory,
-      usersRepositoryInMemory
-    );
+    listLoansUseCase = new ListLoansUseCase(loansRepositoryInMemory);
 
     createLoanUseCase = new CreateLoanUseCase(
       loansRepositoryInMemory,
-      usersRepositoryInMemory,
       contactsRepositoryInMemory
     );
 
@@ -95,12 +91,6 @@ describe('List Loans', () => {
 
     await expect(listLoansUseCase.execute(user.id)).rejects.toEqual(
       new AppError('No loans found', 204)
-    );
-  });
-
-  it('should not be able to list the loans of a nonexistent user', async () => {
-    await expect(listLoansUseCase.execute('123')).rejects.toEqual(
-      new AppError('User not found')
     );
   });
 });
