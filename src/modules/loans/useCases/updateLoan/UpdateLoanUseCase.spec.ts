@@ -2,7 +2,9 @@ import { UsersRepositoryInMemory } from '@modules/accounts/repositories/in-memor
 import { CreateUserUseCase } from '@modules/accounts/useCases/createUser/CreateUserUseCase';
 import { ContactsRepositoryInMemory } from '@modules/contacts/repositories/in-memory/ContactsRepositoryInMemory';
 import { CreateContactUseCase } from '@modules/contacts/useCases/createContact/CreateContactUseCase';
+import { Loan } from '@modules/loans/infra/typeorm/entities/Loan';
 import { LoansRepositoryInMemory } from '@modules/loans/repositories/in-memory/LoansRepositoryInMemory';
+import { createContact, createLoan, createUser } from '@utils/seed';
 
 import { AppError } from '@shared/errors/AppError';
 
@@ -17,38 +19,12 @@ let loansRepositoryInMemory: LoansRepositoryInMemory;
 let usersRepositoryInMemory: UsersRepositoryInMemory;
 let contactsRepositoryInMemory: ContactsRepositoryInMemory;
 
-async function createUser(email: string) {
-  const user = await createUserUseCase.execute({
-    email,
-    password: '12345'
-  });
-
-  return user;
-}
-
-async function createContact(user_id: string) {
-  const contact = await createContactUseCase.execute({
-    name: 'John Doe',
-    user_id
-  });
-
-  return contact;
-}
-
-async function createLoan(user_id: string, contact_id: string) {
-  const loan = await createLoanUseCase.execute({
-    user_id,
-    contact_id,
-    value: 50,
-    type: 'pagar',
-    limit_date: new Date()
-  });
-
-  return loan;
-}
+let user_id: string;
+let contact_id: string;
+let loan: Loan;
 
 describe('Update Loan', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     loansRepositoryInMemory = new LoansRepositoryInMemory();
     usersRepositoryInMemory = new UsersRepositoryInMemory();
     contactsRepositoryInMemory = new ContactsRepositoryInMemory();
@@ -62,21 +38,26 @@ describe('Update Loan', () => {
       loansRepositoryInMemory,
       contactsRepositoryInMemory
     );
-
     createUserUseCase = new CreateUserUseCase(usersRepositoryInMemory);
-
     createContactUseCase = new CreateContactUseCase(contactsRepositoryInMemory);
+
+    const user = await createUser(createUserUseCase, 'test@example.com');
+    const contact = await createContact(
+      createContactUseCase,
+      'John Doe',
+      user.id
+    );
+    loan = await createLoan(createLoanUseCase, user.id, contact.id);
+
+    user_id = user.id;
+    contact_id = contact.id;
   });
 
   it('should be able to update a loan', async () => {
-    const user = await createUser('test@example.com');
-    const contact = await createContact(user.id);
-    const loan = await createLoan(user.id, contact.id);
-
     const result = await updateLoanUseCase.execute({
       id: loan.id,
-      user_id: loan.user_id,
-      contact_id: loan.contact_id,
+      user_id,
+      contact_id,
       value: 100,
       type: 'receber',
       limit_date: loan.limit_date,
@@ -85,25 +66,20 @@ describe('Update Loan', () => {
     });
 
     expect(result).toHaveProperty('id');
-    expect(result.user_id).toEqual(user.id);
-    expect(result.contact_id).toEqual(contact.id);
+    expect(result.user_id).toEqual(user_id);
+    expect(result.contact_id).toEqual(contact_id);
     expect(result.value).toBe(100);
     expect(result.type).toEqual('receber');
   });
 
   it("should not be able to update a loan with a contact that doesn't belong to the user", async () => {
-    const user = await createUser('test@example.com');
-    const contact = await createContact(user.id);
-
-    const otherUser = await createUser('new@example.com');
-
-    const loan = await createLoan(user.id, contact.id);
+    const newUser = await createUser(createUserUseCase, 'new@example.com');
 
     await expect(
       updateLoanUseCase.execute({
         id: loan.id,
-        user_id: otherUser.id,
-        contact_id: loan.contact_id,
+        user_id: newUser.id,
+        contact_id,
         value: 100,
         type: 'receber',
         limit_date: loan.limit_date,
@@ -116,15 +92,11 @@ describe('Update Loan', () => {
   });
 
   it('should not be able to update a loan with the value less than 1', async () => {
-    const user = await createUser('test@example.com');
-    const contact = await createContact(user.id);
-    const loan = await createLoan(user.id, contact.id);
-
     await expect(
       updateLoanUseCase.execute({
         id: loan.id,
-        user_id: loan.user_id,
-        contact_id: loan.contact_id,
+        user_id,
+        contact_id,
         value: -1000,
         type: 'receber',
         limit_date: loan.limit_date,
@@ -135,14 +107,11 @@ describe('Update Loan', () => {
   });
 
   it('should not be able to update a nonexistent loan', async () => {
-    const user = await createUser('test@example.com');
-    const contact = await createContact(user.id);
-
     await expect(
       updateLoanUseCase.execute({
         id: '123',
-        user_id: user.id,
-        contact_id: contact.id,
+        user_id,
+        contact_id,
         value: 100,
         type: 'receber',
         limit_date: new Date(),
@@ -153,14 +122,10 @@ describe('Update Loan', () => {
   });
 
   it('should not be able to update a loan of a nonexistent contact', async () => {
-    const user = await createUser('test@example.com');
-    const contact = await createContact(user.id);
-    const loan = await createLoan(user.id, contact.id);
-
     await expect(
       updateLoanUseCase.execute({
         id: loan.id,
-        user_id: user.id,
+        user_id,
         contact_id: '123',
         value: 50,
         type: 'receber',

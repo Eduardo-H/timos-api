@@ -3,6 +3,7 @@ import { CreateUserUseCase } from '@modules/accounts/useCases/createUser/CreateU
 import { ContactsRepositoryInMemory } from '@modules/contacts/repositories/in-memory/ContactsRepositoryInMemory';
 import { CreateContactUseCase } from '@modules/contacts/useCases/createContact/CreateContactUseCase';
 import { LoansRepositoryInMemory } from '@modules/loans/repositories/in-memory/LoansRepositoryInMemory';
+import { createContact, createLoan, createUser } from '@utils/seed';
 
 import { AppError } from '@shared/errors/AppError';
 
@@ -17,38 +18,11 @@ let loansRepositoryInMemory: LoansRepositoryInMemory;
 let usersRepositoryInMemory: UsersRepositoryInMemory;
 let contactsRepositoryInMemory: ContactsRepositoryInMemory;
 
-async function createUser(email: string) {
-  const user = await createUserUseCase.execute({
-    email,
-    password: '12345'
-  });
-
-  return user;
-}
-
-async function createContact(user_id: string) {
-  const contact = await createContactUseCase.execute({
-    name: 'John Doe',
-    user_id
-  });
-
-  return contact;
-}
-
-async function createLoan(user_id: string, contact_id: string) {
-  const loan = await createLoanUseCase.execute({
-    user_id,
-    contact_id,
-    value: 50,
-    type: 'pagar',
-    limit_date: new Date()
-  });
-
-  return loan;
-}
+let user_id: string;
+let loan_id: string;
 
 describe('Delete Loan', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     loansRepositoryInMemory = new LoansRepositoryInMemory();
     usersRepositoryInMemory = new UsersRepositoryInMemory();
     contactsRepositoryInMemory = new ContactsRepositoryInMemory();
@@ -59,47 +33,46 @@ describe('Delete Loan', () => {
       loansRepositoryInMemory,
       contactsRepositoryInMemory
     );
-
     createUserUseCase = new CreateUserUseCase(usersRepositoryInMemory);
-
     createContactUseCase = new CreateContactUseCase(contactsRepositoryInMemory);
+
+    const user = await createUser(createUserUseCase, 'test@example.com');
+    const contact = await createContact(
+      createContactUseCase,
+      'John Doe',
+      user.id
+    );
+    const loan = await createLoan(createLoanUseCase, user.id, contact.id);
+
+    user_id = user.id;
+    loan_id = loan.id;
   });
 
   it('should be able to delete a loan', async () => {
-    const user = await createUser('test@example.com');
-    const contact = await createContact(user.id);
-    const loan = await createLoan(user.id, contact.id);
-
     const result = await deleteLoanUseCase.execute({
-      id: loan.id,
-      user_id: user.id
+      id: loan_id,
+      user_id
     });
 
     expect(result).toBeUndefined();
   });
 
   it('should not be able to delete a nonexistent loan', async () => {
-    const user = await createUser('test@example.com');
-
     await expect(
       deleteLoanUseCase.execute({
         id: '123',
-        user_id: user.id
+        user_id
       })
     ).rejects.toEqual(new AppError('Loan not found'));
   });
 
   it('should not be able to delete a loan of another user', async () => {
-    const user = await createUser('test@example.com');
-    const contact = await createContact(user.id);
-    const loan = await createLoan(user.id, contact.id);
-
-    const otherUser = await createUser('new@example.com');
+    const newUser = await createUser(createUserUseCase, 'new@example.com');
 
     await expect(
       deleteLoanUseCase.execute({
-        id: loan.id,
-        user_id: otherUser.id
+        id: loan_id,
+        user_id: newUser.id
       })
     ).rejects.toEqual(new AppError('Loan does not belong to the user', 401));
   });
