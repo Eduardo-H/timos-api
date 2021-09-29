@@ -20,6 +20,16 @@ class UsersRepositoryInMemory implements IUsersRepository {
     return user;
   }
 
+  async update(id: string, name: string): Promise<User> {
+    const user = this.users.find((user) => user.id === id);
+
+    Object.assign(user, {
+      name
+    });
+
+    return user;
+  }
+
   async deleteById(id: string): Promise<void> {
     const index = this.users.findIndex((user) => user.id === id);
     this.users.splice(index, 1);
