@@ -22,7 +22,7 @@ class DeleteLoanUseCase {
       throw new AppError('Loan not found');
     }
 
-    if (user_id !== loan.user_id) {
+    if (user_id !== loan.payer_id && user_id !== loan.receiver_id) {
       throw new AppError('Loan does not belong to the user', 401);
     }
 

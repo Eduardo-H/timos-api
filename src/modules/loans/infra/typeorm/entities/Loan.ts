@@ -1,5 +1,4 @@
 import { User } from '@modules/accounts/infra/typeorm/entities/User';
-import { Contact } from '@modules/contacts/infra/typeorm/entities/Contact';
 import {
   Column,
   CreateDateColumn,
@@ -18,18 +17,18 @@ class Loan {
   id: string;
 
   @Column()
-  user_id: string;
+  payer_id: string;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
+  @JoinColumn({ name: 'payer_id' })
+  payer: User;
 
   @Column()
-  contact_id: string;
+  receiver_id: string;
 
-  @ManyToOne(() => Contact)
-  @JoinColumn({ name: 'contact_id' })
-  contact: Contact;
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'receiver_id' })
+  receiver: User;
 
   @Column()
   value: number;
@@ -38,7 +37,7 @@ class Loan {
   type: string;
 
   @Column()
-  fee: number;
+  fee?: number;
 
   @Column()
   status: string;

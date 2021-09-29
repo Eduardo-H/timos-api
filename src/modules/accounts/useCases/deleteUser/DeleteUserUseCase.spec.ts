@@ -19,6 +19,7 @@ describe('Delete User', () => {
 
   it('should be able to delete an user', async () => {
     const user = await createAccountUseCase.execute({
+      name: 'John Doe',
       email: 'test@example.com',
       password: '12345'
     });
@@ -42,6 +43,7 @@ describe('Delete User', () => {
 
   it('should not be able to delete an user with wrong password', async () => {
     const user = await createAccountUseCase.execute({
+      name: 'John Doe',
       email: 'test@example.com',
       password: '12345'
     });

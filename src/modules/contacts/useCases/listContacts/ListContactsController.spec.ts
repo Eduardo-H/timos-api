@@ -5,29 +5,16 @@ import { app } from '@shared/infra/http/app';
 import { closeRedisConnection } from '@shared/infra/http/middlewares/rateLimiter';
 
 let connection: Connection;
-let refreshToken: string;
-
-async function createContacts(size: number) {
-  // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < size; i++) {
-    // eslint-disable-next-line no-await-in-loop
-    await request(app)
-      .post('/contacts')
-      .send({
-        name: `John Doe #${i}`
-      })
-      .set({
-        Authorization: `Bearer ${refreshToken}`
-      });
-  }
-}
+let token: string;
 
 describe('List Contacts Controller', () => {
   beforeAll(async () => {
     connection = await createConnection();
     await connection.runMigrations();
 
+    // Creating a user
     await request(app).post('/users').send({
+      name: 'John Doe',
       email: 'test@example.com',
       password: '12345'
     });
@@ -37,9 +24,31 @@ describe('List Contacts Controller', () => {
       password: '12345'
     });
 
-    refreshToken = tokenResponse.body.refresh_token;
+    token = tokenResponse.body.token;
 
-    await createContacts(15);
+    // Creating another user
+    await request(app).post('/users').send({
+      name: 'John Doe',
+      email: 'new@example.com',
+      password: '12345'
+    });
+
+    const contactResponse = await request(app).post('/session').send({
+      email: 'new@example.com',
+      password: '12345'
+    });
+
+    const contact_id = contactResponse.body.user.id;
+
+    // Creating the connection between the two users
+    await request(app)
+      .post('/contacts')
+      .send({
+        contact_id
+      })
+      .set({
+        Authorization: `Bearer ${token}`
+      });
   });
 
   afterAll(async () => {
@@ -52,7 +61,7 @@ describe('List Contacts Controller', () => {
     const response = await request(app)
       .get('/contacts')
       .set({
-        Authorization: `Bearer ${refreshToken}`
+        Authorization: `Bearer ${token}`
       });
 
     expect(response.statusCode).toBe(200);
@@ -61,21 +70,11 @@ describe('List Contacts Controller', () => {
   it('should be able to paginate results', async () => {
     const response = await request(app)
       .get('/contacts')
-      .set({
-        Authorization: `Bearer ${refreshToken}`
-      });
-
-    expect(response.statusCode).toBe(200);
-  });
-
-  it('should be able to limit results', async () => {
-    const response = await request(app)
-      .get('/contacts')
       .query({
         page: 1
       })
       .set({
-        Authorization: `Bearer ${refreshToken}`
+        Authorization: `Bearer ${token}`
       });
 
     expect(response.statusCode).toBe(200);
@@ -88,7 +87,7 @@ describe('List Contacts Controller', () => {
         limit: 5
       })
       .set({
-        Authorization: `Bearer ${refreshToken}`
+        Authorization: `Bearer ${token}`
       });
 
     expect(response.statusCode).toBe(200);
@@ -96,38 +95,22 @@ describe('List Contacts Controller', () => {
 
   it('should return 204 status when the user have no contacts', async () => {
     await request(app).post('/users').send({
-      email: 'new@example.com',
+      name: 'John Doe',
+      email: 'johndoe@example.com',
       password: '12345'
     });
 
     const tokenResponse = await request(app).post('/session').send({
-      email: 'new@example.com',
+      email: 'johndoe@example.com',
       password: '12345'
     });
 
-    const { refresh_token } = tokenResponse.body;
+    const newUserToken = tokenResponse.body.token;
 
     const response = await request(app)
       .get('/contacts')
       .set({
-        Authorization: `Bearer ${refresh_token}`
-      });
-
-    expect(response.statusCode).toBe(204);
-  });
-
-  it('should not be able to list contacts of a different user', async () => {
-    const tokenResponse = await request(app).post('/session').send({
-      email: 'new@example.com',
-      password: '12345'
-    });
-
-    const { refresh_token } = tokenResponse.body;
-
-    const response = await request(app)
-      .get('/contacts')
-      .set({
-        Authorization: `Bearer ${refresh_token}`
+        Authorization: `Bearer ${newUserToken}`
       });
 
     expect(response.statusCode).toBe(204);

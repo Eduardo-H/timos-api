@@ -23,6 +23,7 @@ describe('Authenticate User Controller', () => {
 
   it('should be able to authenticate an user', async () => {
     await request(app).post('/users').send({
+      name: 'John Doe',
       email: 'test@example.com',
       password: '12345'
     });

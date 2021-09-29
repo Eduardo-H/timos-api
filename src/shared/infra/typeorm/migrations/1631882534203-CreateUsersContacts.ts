@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class CreateContacts1631137071929 implements MigrationInterface {
+export class CreateUsersContacts1631882534203 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
-        name: 'contacts',
+        name: 'users_contacts',
         columns: [
           {
             name: 'id',
@@ -12,20 +12,15 @@ export class CreateContacts1631137071929 implements MigrationInterface {
             isPrimary: true
           },
           {
-            name: 'name',
-            type: 'varchar'
-          },
-          {
             name: 'user_id',
             type: 'uuid'
           },
           {
-            name: 'created_at',
-            type: 'timestamp',
-            default: 'now()'
+            name: 'contact_id',
+            type: 'uuid'
           },
           {
-            name: 'updated_at',
+            name: 'created_at',
             type: 'timestamp',
             default: 'now()'
           }
@@ -38,6 +33,14 @@ export class CreateContacts1631137071929 implements MigrationInterface {
             columnNames: ['user_id'],
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE'
+          },
+          {
+            name: 'FKContactContact',
+            referencedTableName: 'users',
+            referencedColumnNames: ['id'],
+            columnNames: ['contact_id'],
+            onUpdate: 'CASCADE',
+            onDelete: 'CASCADE'
           }
         ]
       })
@@ -45,6 +48,6 @@ export class CreateContacts1631137071929 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('contacts');
+    await queryRunner.dropTable('users_contacts');
   }
 }

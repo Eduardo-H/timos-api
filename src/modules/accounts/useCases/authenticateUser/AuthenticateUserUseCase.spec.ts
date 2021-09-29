@@ -31,6 +31,7 @@ describe('Authenticate User', () => {
 
   it('should be able to authenticate an user', async () => {
     const user: ICreateUserDTO = {
+      name: 'John Doe',
       email: 'test@example.com',
       password: '12345'
     };
@@ -46,7 +47,7 @@ describe('Authenticate User', () => {
     expect(result).toHaveProperty('refresh_token');
   });
 
-  it('should not be able to authenticate a non-existing user', async () => {
+  it('should not be able to authenticate a nonexisting user', async () => {
     await expect(
       authenticateUserUseCase.execute({
         email: 'johndoe@example.com',
@@ -57,6 +58,7 @@ describe('Authenticate User', () => {
 
   it('should not be able to authenticate an user with the wrong password', async () => {
     const user: ICreateUserDTO = {
+      name: 'John Doe',
       email: 'test@example.com',
       password: '12345'
     };

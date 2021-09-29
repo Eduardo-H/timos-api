@@ -20,6 +20,10 @@ export class CreatePayments1631389653400 implements MigrationInterface {
             type: 'numeric'
           },
           {
+            name: 'status',
+            type: 'varchar'
+          },
+          {
             name: 'created_at',
             type: 'timestamp',
             default: 'now()'

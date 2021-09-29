@@ -11,19 +11,8 @@ class ContactsRepository implements IContactsRepository {
     this.repository = getRepository(Contact);
   }
 
-  async create({ name, user_id }: ICreateContactDTO): Promise<Contact> {
-    const contact = this.repository.create({ name, user_id });
-
-    await this.repository.save(contact);
-
-    return contact;
-  }
-
-  async update(id: string, name: string): Promise<Contact> {
-    const contact = await this.repository.findOne({ id });
-
-    contact.name = name;
-    contact.updated_at = new Date();
+  async create({ user_id, contact_id }: ICreateContactDTO): Promise<Contact> {
+    const contact = this.repository.create({ user_id, contact_id });
 
     await this.repository.save(contact);
 
@@ -40,10 +29,9 @@ class ContactsRepository implements IContactsRepository {
     return contact;
   }
 
-  async findByName(name: string, user_id: string): Promise<Contact> {
+  async findConnection(user_id: string, contact_id: string): Promise<Contact> {
     const contact = await this.repository.findOne({
-      name,
-      user_id
+      where: { user_id, contact_id }
     });
 
     return contact;

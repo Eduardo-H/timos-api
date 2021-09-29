@@ -20,6 +20,7 @@ describe('Create User Controller', () => {
 
   it('should be able to create a new user', async () => {
     const response = await request(app).post('/users').send({
+      name: 'John Doe',
       email: 'test@example.com',
       password: '12345'
     });
@@ -29,6 +30,7 @@ describe('Create User Controller', () => {
 
   it('should not be able to create a repeated user', async () => {
     const response = await request(app).post('/users').send({
+      name: 'John Doe',
       email: 'test@example.com',
       password: '12345'
     });

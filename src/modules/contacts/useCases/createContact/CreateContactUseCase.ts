@@ -12,17 +12,27 @@ class CreateContactUseCase {
     private contactsRepository: IContactsRepository
   ) {}
 
-  async execute({ name, user_id }: ICreateContactDTO): Promise<Contact> {
-    const contactAlreadyExists = await this.contactsRepository.findByName(
-      name,
-      user_id
+  async execute({ user_id, contact_id }: ICreateContactDTO): Promise<Contact> {
+    const contactAlreadyExists = await this.contactsRepository.findConnection(
+      user_id,
+      contact_id
     );
 
     if (contactAlreadyExists) {
-      throw new AppError('Contact already exists');
+      throw new AppError('This connection already exists');
     }
 
-    const contact = await this.contactsRepository.create({ name, user_id });
+    // Creating the contact for the user that received the invite
+    const contact = await this.contactsRepository.create({
+      user_id,
+      contact_id
+    });
+
+    // Creating the contact for the user that sent the invite
+    await this.contactsRepository.create({
+      contact_id: user_id,
+      user_id: contact_id
+    });
 
     return contact;
   }

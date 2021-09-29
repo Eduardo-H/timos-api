@@ -18,14 +18,14 @@ describe('Delete Contact', () => {
   });
 
   it('should be able to delete a contact', async () => {
-    const contact = await createContactUseCase.execute({
-      name: 'John Doe',
-      user_id: '123'
+    await createContactUseCase.execute({
+      user_id: '123',
+      contact_id: '987'
     });
 
     const result = await deleteContactUseCase.execute({
-      id: contact.id,
-      user_id: contact.user_id
+      user_id: '123',
+      contact_id: '987'
     });
 
     expect(result).toBeUndefined();
@@ -33,20 +33,7 @@ describe('Delete Contact', () => {
 
   it('should not be able to delete a nonexistent contact', async () => {
     await expect(
-      deleteContactUseCase.execute({ id: '123', user_id: '123' })
-    ).rejects.toEqual(new AppError('Contact not found'));
-  });
-
-  it('should not be able to delete of a different user', async () => {
-    const contact = await createContactUseCase.execute({
-      name: 'John Doe',
-      user_id: '123'
-    });
-
-    await expect(
-      deleteContactUseCase.execute({ id: contact.id, user_id: '000' })
-    ).rejects.toEqual(
-      new AppError('This contact does not belong to the user', 403)
-    );
+      deleteContactUseCase.execute({ user_id: '123', contact_id: '000' })
+    ).rejects.toEqual(new AppError("You're not connected to this user"));
   });
 });

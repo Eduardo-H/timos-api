@@ -1,7 +1,7 @@
 interface IUpdateLoanDTO {
   id: string;
-  user_id: string;
-  contact_id: string;
+  payer_id: string;
+  receiver_id: string;
   value: number;
   type: string;
   fee?: number;

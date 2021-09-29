@@ -6,26 +6,15 @@ import { IContactsRepository } from '../IContactsRepository';
 class ContactsRepositoryInMemory implements IContactsRepository {
   contacts: Contact[] = [];
 
-  async create({ name, user_id }: ICreateContactDTO): Promise<Contact> {
+  async create({ user_id, contact_id }: ICreateContactDTO): Promise<Contact> {
     const contact = new Contact();
 
     Object.assign(contact, {
-      name,
-      user_id
+      user_id,
+      contact_id
     });
 
     this.contacts.push(contact);
-
-    return contact;
-  }
-
-  async update(id: string, name: string): Promise<Contact> {
-    const contact = this.contacts.find((contact) => contact.id === id);
-
-    Object.assign(contact, {
-      name,
-      updated_at: new Date()
-    });
 
     return contact;
   }
@@ -42,9 +31,10 @@ class ContactsRepositoryInMemory implements IContactsRepository {
     return contact;
   }
 
-  async findByName(name: string, user_id: string): Promise<Contact> {
+  async findConnection(user_id: string, contact_id: string): Promise<Contact> {
     const contact = this.contacts.find(
-      (contact) => contact.name === name && contact.user_id === user_id
+      (contact) =>
+        contact.user_id === user_id && contact.contact_id === contact_id
     );
 
     return contact;

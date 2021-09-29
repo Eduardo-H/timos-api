@@ -12,6 +12,7 @@ async function createUser(
   email: string
 ): Promise<User> {
   const user = await createUserUseCase.execute({
+    name: 'John Doe',
     email,
     password: '12345'
   });
@@ -20,12 +21,12 @@ async function createUser(
 
 async function createContact(
   createContactUseCase: CreateContactUseCase,
-  name: string,
-  user_id: string
+  user_id: string,
+  contact_id: string
 ): Promise<Contact> {
   const contact = await createContactUseCase.execute({
-    name,
-    user_id
+    user_id,
+    contact_id
   });
   return contact;
 }

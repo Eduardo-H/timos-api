@@ -16,6 +16,7 @@ describe('Create User', () => {
 
   it('should be able to create an user', async () => {
     const newUser: ICreateUserDTO = {
+      name: 'John Doe',
       email: 'test@example.com',
       password: '12345'
     };
@@ -27,6 +28,7 @@ describe('Create User', () => {
 
   it('should not be able to create a repeated user', async () => {
     const newUser: ICreateUserDTO = {
+      name: 'John Doe',
       email: 'test@example.com',
       password: '12345'
     };

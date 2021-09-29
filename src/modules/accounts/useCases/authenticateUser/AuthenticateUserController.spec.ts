@@ -20,6 +20,7 @@ describe('Authenticate User Controller', () => {
 
   it('should be able to authenticate an user', async () => {
     await request(app).post('/users').send({
+      name: 'John Doe',
       email: 'test@example.com',
       password: '12345'
     });
@@ -32,7 +33,7 @@ describe('Authenticate User Controller', () => {
     expect(response.statusCode).toBe(200);
   });
 
-  it('should not be able to authenticate a non-existing user', async () => {
+  it('should not be able to authenticate a nonexisting user', async () => {
     const response = await request(app).post('/session').send({
       email: 'johndoe@example.com',
       password: '00000'

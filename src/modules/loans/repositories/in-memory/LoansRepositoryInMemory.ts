@@ -8,8 +8,8 @@ class LoansRepositoryInMemory implements ILoansRepository {
   loans: Loan[] = [];
 
   async create({
-    user_id,
-    contact_id,
+    payer_id,
+    receiver_id,
     value,
     type,
     fee,
@@ -18,8 +18,8 @@ class LoansRepositoryInMemory implements ILoansRepository {
     const loan = new Loan();
 
     Object.assign(loan, {
-      user_id,
-      contact_id,
+      payer_id,
+      receiver_id,
       value,
       type,
       fee,
@@ -36,8 +36,8 @@ class LoansRepositoryInMemory implements ILoansRepository {
 
   async update({
     id,
-    user_id,
-    contact_id,
+    payer_id,
+    receiver_id,
     value,
     type,
     limit_date,
@@ -47,8 +47,8 @@ class LoansRepositoryInMemory implements ILoansRepository {
     const loan = this.loans.find((loan) => loan.id === id);
 
     Object.assign(loan, {
-      user_id,
-      contact_id,
+      payer_id,
+      receiver_id,
       value,
       type,
       limit_date,
@@ -60,7 +60,9 @@ class LoansRepositoryInMemory implements ILoansRepository {
   }
 
   async listByUserId(user_id: string): Promise<Loan[]> {
-    const loans = this.loans.filter((loan) => loan.user_id === user_id);
+    const loans = this.loans.filter(
+      (loan) => loan.payer_id === user_id || loan.receiver_id === user_id
+    );
     return loans;
   }
 

@@ -1,11 +1,19 @@
 import { IContactsRepository } from '@modules/contacts/repositories/IContactsRepository';
-import { ICreateLoanDTO } from '@modules/loans/dtos/ICreateLoanDTO';
 import { Loan } from '@modules/loans/infra/typeorm/entities/Loan';
 import { ILoansRepository } from '@modules/loans/repositories/ILoansRepository';
 import { inject, injectable } from 'tsyringe';
 
 import { IDateProvider } from '@shared/container/providers/DateProvider/IDateProvider';
 import { AppError } from '@shared/errors/AppError';
+
+interface IPayload {
+  user_id: string;
+  contact_id: string;
+  value: number;
+  type: string;
+  fee?: number;
+  limit_date: Date;
+}
 
 @injectable()
 class CreateLoanUseCase {
@@ -25,15 +33,14 @@ class CreateLoanUseCase {
     type,
     fee,
     limit_date
-  }: ICreateLoanDTO): Promise<Loan> {
-    const contact = await this.contactsRepository.findById(contact_id);
+  }: IPayload): Promise<Loan> {
+    const connection = await this.contactsRepository.findConnection(
+      user_id,
+      contact_id
+    );
 
-    if (!contact) {
-      throw new AppError('Contact not found');
-    }
-
-    if (user_id !== contact.user_id) {
-      throw new AppError('This contact does not belong to the user', 401);
+    if (!connection) {
+      throw new AppError("You're not connected to this user");
     }
 
     if (value < 1) {
@@ -53,9 +60,20 @@ class CreateLoanUseCase {
       finalValue += monthlyFeeValue * loanDurationInMonths;
     }
 
+    let payer_id: string;
+    let receiver_id: string;
+
+    if (type === 'pagar') {
+      payer_id = user_id;
+      receiver_id = contact_id;
+    } else {
+      payer_id = contact_id;
+      receiver_id = user_id;
+    }
+
     const loan = await this.loansRepository.create({
-      user_id,
-      contact_id: contact.id,
+      payer_id,
+      receiver_id,
       value: finalValue,
       type,
       fee,

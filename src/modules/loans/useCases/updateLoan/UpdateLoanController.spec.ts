@@ -5,8 +5,7 @@ import { app } from '@shared/infra/http/app';
 import { closeRedisConnection } from '@shared/infra/http/middlewares/rateLimiter';
 
 let connection: Connection;
-let refreshToken: string;
-let contact_id: string;
+let token: string;
 let loan_id: string;
 
 const wrongJWT =
@@ -17,7 +16,9 @@ describe('Update Loan Controller', () => {
     connection = await createConnection();
     await connection.runMigrations();
 
+    // Creating a new user
     await request(app).post('/users').send({
+      name: 'John Doe',
       email: 'test@example.com',
       password: '12345'
     });
@@ -27,19 +28,33 @@ describe('Update Loan Controller', () => {
       password: '12345'
     });
 
-    refreshToken = tokenResponse.body.refresh_token;
+    token = tokenResponse.body.token;
 
-    const contactResponse = await request(app)
+    // Creating another user
+    await request(app).post('/users').send({
+      name: 'John Doe',
+      email: 'new@example.com',
+      password: '12345'
+    });
+
+    const contactResponse = await request(app).post('/session').send({
+      email: 'new@example.com',
+      password: '12345'
+    });
+
+    const contact_id = contactResponse.body.user.id;
+
+    // Creatin the connection between the two users
+    await request(app)
       .post('/contacts')
       .send({
-        name: 'John Doe'
+        contact_id
       })
       .set({
-        Authorization: `Bearer ${refreshToken}`
+        Authorization: `Bearer ${token}`
       });
 
-    contact_id = contactResponse.body.id;
-
+    // Creating a new loan between the two users
     const loanResponse = await request(app)
       .post('/loans')
       .send({
@@ -49,7 +64,7 @@ describe('Update Loan Controller', () => {
         limit_date: new Date('2030-06-01')
       })
       .set({
-        Authorization: `Bearer ${refreshToken}`
+        Authorization: `Bearer ${token}`
       });
 
     loan_id = loanResponse.body.id;
@@ -66,7 +81,6 @@ describe('Update Loan Controller', () => {
       .put('/loans')
       .send({
         id: loan_id,
-        contact_id,
         value: 100,
         type: 'receber',
         limit_date: new Date('2030-06-01'),
@@ -74,7 +88,7 @@ describe('Update Loan Controller', () => {
         status: 'aberto'
       })
       .set({
-        Authorization: `Bearer ${refreshToken}`
+        Authorization: `Bearer ${token}`
       });
 
     expect(response.statusCode).toBe(201);
@@ -82,6 +96,7 @@ describe('Update Loan Controller', () => {
 
   it("should not be able to update a loan with a contact that doesn't belong to the user", async () => {
     await request(app).post('/users').send({
+      name: 'John Doe',
       email: 'new@example.com',
       password: '12345'
     });
@@ -97,7 +112,6 @@ describe('Update Loan Controller', () => {
       .put('/loans')
       .send({
         id: loan_id,
-        contact_id,
         value: 100,
         type: 'receber',
         limit_date: new Date('2030-06-01'),
@@ -116,7 +130,6 @@ describe('Update Loan Controller', () => {
       .put('/loans')
       .send({
         id: loan_id,
-        contact_id,
         value: -100,
         type: 'receber',
         limit_date: new Date('2030-06-01'),
@@ -124,7 +137,7 @@ describe('Update Loan Controller', () => {
         status: 'aberto'
       })
       .set({
-        Authorization: `Bearer ${refreshToken}`
+        Authorization: `Bearer ${token}`
       });
 
     expect(response.statusCode).toBe(400);
@@ -135,7 +148,6 @@ describe('Update Loan Controller', () => {
       .put('/loans')
       .send({
         id: '868272c3-c308-44e8-9a53-e0ccf61e9639',
-        contact_id,
         value: 100,
         type: 'receber',
         limit_date: new Date('2030-06-01'),
@@ -143,7 +155,7 @@ describe('Update Loan Controller', () => {
         status: 'aberto'
       })
       .set({
-        Authorization: `Bearer ${refreshToken}`
+        Authorization: `Bearer ${token}`
       });
 
     expect(response.statusCode).toBe(400);
@@ -154,7 +166,6 @@ describe('Update Loan Controller', () => {
       .put('/loans')
       .send({
         id: loan_id,
-        contact_id,
         value: 100,
         type: 'receber',
         limit_date: new Date('2030-06-01'),
@@ -166,24 +177,5 @@ describe('Update Loan Controller', () => {
       });
 
     expect(response.statusCode).toBe(401);
-  });
-
-  it('should not be able to update a loan of a nonexistent contact', async () => {
-    const response = await request(app)
-      .put('/loans')
-      .send({
-        id: loan_id,
-        contact_id: '868272c3-c308-44e8-9a53-e0ccf61e9639',
-        value: 100,
-        type: 'receber',
-        limit_date: new Date('2030-06-01'),
-        closed_at: null,
-        status: 'aberto'
-      })
-      .set({
-        Authorization: `Bearer ${refreshToken}`
-      });
-
-    expect(response.statusCode).toBe(400);
   });
 });

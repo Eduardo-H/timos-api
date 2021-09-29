@@ -1,6 +1,6 @@
 interface ICreateLoanDTO {
-  user_id: string;
-  contact_id: string;
+  payer_id: string;
+  receiver_id: string;
   value: number;
   type: string;
   fee?: number;

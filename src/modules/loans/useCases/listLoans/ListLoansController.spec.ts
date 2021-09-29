@@ -5,7 +5,7 @@ import { app } from '@shared/infra/http/app';
 import { closeRedisConnection } from '@shared/infra/http/middlewares/rateLimiter';
 
 let connection: Connection;
-let refreshToken: string;
+let token: string;
 let contact_id: string;
 
 const wrongJWT =
@@ -16,8 +16,9 @@ describe('List Loans Controller', () => {
     connection = await createConnection();
     await connection.runMigrations();
 
-    // Creating a new user and fetching refresh token
+    // Creating a new user
     await request(app).post('/users').send({
+      name: 'John Doe',
       email: 'test@example.com',
       password: '12345'
     });
@@ -27,19 +28,31 @@ describe('List Loans Controller', () => {
       password: '12345'
     });
 
-    refreshToken = tokenResponse.body.refresh_token;
+    token = tokenResponse.body.token;
 
-    // Creating a new contact
-    const contactResponse = await request(app)
+    // Creating another user
+    await request(app).post('/users').send({
+      name: 'John Doe',
+      email: 'new@example.com',
+      password: '12345'
+    });
+
+    const contactResponse = await request(app).post('/session').send({
+      email: 'new@example.com',
+      password: '12345'
+    });
+
+    contact_id = contactResponse.body.user.id;
+
+    // Creatin the connection between the two users
+    await request(app)
       .post('/contacts')
       .send({
-        name: 'John Doe'
+        contact_id
       })
       .set({
-        Authorization: `Bearer ${refreshToken}`
+        Authorization: `Bearer ${token}`
       });
-
-    contact_id = contactResponse.body.id;
   });
 
   afterAll(async () => {
@@ -59,32 +72,33 @@ describe('List Loans Controller', () => {
         limit_date: new Date('2030-06-01')
       })
       .set({
-        Authorization: `Bearer ${refreshToken}`
+        Authorization: `Bearer ${token}`
       });
 
     const response = await request(app)
       .get('/loans')
-      .set({ Authorization: `Bearer ${refreshToken}` });
+      .set({ Authorization: `Bearer ${token}` });
 
     expect(response.statusCode).toBe(200);
   });
 
   it('should return status code 204 when the user has no loans', async () => {
     await request(app).post('/users').send({
-      email: 'new@example.com',
+      name: 'John Doe',
+      email: 'johndoe@example.com',
       password: '12345'
     });
 
     const tokenResponse = await request(app).post('/session').send({
-      email: 'new@example.com',
+      email: 'johndoe@example.com',
       password: '12345'
     });
 
-    const { refresh_token } = tokenResponse.body;
+    const newUserToken = tokenResponse.body.token;
 
     const response = await request(app)
       .get('/loans')
-      .set({ Authorization: `Bearer ${refresh_token}` });
+      .set({ Authorization: `Bearer ${newUserToken}` });
 
     expect(response.statusCode).toBe(204);
   });

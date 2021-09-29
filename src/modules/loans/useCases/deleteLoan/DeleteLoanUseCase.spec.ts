@@ -41,11 +41,10 @@ describe('Delete Loan', () => {
     createContactUseCase = new CreateContactUseCase(contactsRepositoryInMemory);
 
     const user = await createUser(createUserUseCase, 'test@example.com');
-    const contact = await createContact(
-      createContactUseCase,
-      'John Doe',
-      user.id
-    );
+    const contact = await createUser(createUserUseCase, 'new@example.com');
+
+    await createContact(createContactUseCase, user.id, contact.id);
+
     const loan = await createLoan(
       createLoanUseCase,
       user.id,
@@ -76,7 +75,7 @@ describe('Delete Loan', () => {
   });
 
   it('should not be able to delete a loan of another user', async () => {
-    const newUser = await createUser(createUserUseCase, 'new@example.com');
+    const newUser = await createUser(createUserUseCase, 'johndoe@example.com');
 
     await expect(
       deleteLoanUseCase.execute({

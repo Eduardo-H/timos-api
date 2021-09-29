@@ -12,7 +12,11 @@ class PaymentsRepository implements IPaymentsRepository {
   }
 
   async create({ loan_id, value }: ICreatePaymentDTO): Promise<Payment> {
-    const payment = this.repository.create({ loan_id, value });
+    const payment = this.repository.create({
+      loan_id,
+      value,
+      status: 'pendente'
+    });
 
     await this.repository.save(payment);
 

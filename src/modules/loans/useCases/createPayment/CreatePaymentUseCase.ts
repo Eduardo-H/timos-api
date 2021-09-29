@@ -31,7 +31,7 @@ class CreatePaymentUseCase {
       throw new AppError('The minimum payment value is 1');
     }
 
-    if (user_id !== loan.user_id) {
+    if (user_id !== loan.payer_id && user_id !== loan.receiver_id) {
       throw new AppError('The loan does not belong to the user', 401);
     }
 

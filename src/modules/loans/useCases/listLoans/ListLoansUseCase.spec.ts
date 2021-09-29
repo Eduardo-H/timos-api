@@ -58,11 +58,10 @@ describe('List Loans', () => {
     );
 
     const user = await createUser(createUserUseCase, 'test@example.com');
-    const contact = await createContact(
-      createContactUseCase,
-      'John Doe',
-      user.id
-    );
+    const contact = await createUser(createUserUseCase, 'new@example.com');
+
+    await createContact(createContactUseCase, user.id, contact.id);
+
     const loan = await createLoan(
       createLoanUseCase,
       user.id,
@@ -84,7 +83,7 @@ describe('List Loans', () => {
     const result = await listLoansUseCase.execute(user_id);
 
     expect(result.length).toBe(2);
-    expect(result[0].user_id).toEqual(user_id);
+    expect(result[0].payer_id).toEqual(user_id);
     expect(result[0].type).toEqual('pagar');
   });
 
@@ -94,7 +93,7 @@ describe('List Loans', () => {
     const result = await listLoansUseCase.execute(user_id);
 
     expect(result.length).toBe(2);
-    expect(result[0].user_id).toEqual(user_id);
+    expect(result[0].payer_id).toEqual(user_id);
     expect(result[0].type).toEqual('pagar');
     expect(result[0].payments.length).toBe(1);
     expect(result[0].payments[0].value).toBe(50);

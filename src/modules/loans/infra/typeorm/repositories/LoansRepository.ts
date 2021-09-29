@@ -13,16 +13,16 @@ class LoansRepository implements ILoansRepository {
   }
 
   async create({
-    user_id,
-    contact_id,
+    payer_id,
+    receiver_id,
     value,
     type,
     fee,
     limit_date
   }: ICreateLoanDTO): Promise<Loan> {
     const loan = this.repository.create({
-      user_id,
-      contact_id,
+      payer_id,
+      receiver_id,
       value,
       fee,
       status: 'aberto',
@@ -37,8 +37,8 @@ class LoansRepository implements ILoansRepository {
 
   async update({
     id,
-    user_id,
-    contact_id,
+    payer_id,
+    receiver_id,
     value,
     type,
     limit_date,
@@ -47,8 +47,8 @@ class LoansRepository implements ILoansRepository {
   }: IUpdateLoanDTO): Promise<Loan> {
     const loan = this.repository.create({
       id,
-      user_id,
-      contact_id,
+      payer_id,
+      receiver_id,
       value,
       type,
       limit_date,
@@ -63,7 +63,7 @@ class LoansRepository implements ILoansRepository {
 
   async listByUserId(user_id: string): Promise<Loan[]> {
     const loans = await this.repository.find({
-      where: { user_id }
+      where: [{ payer_id: user_id }, { receiver_id: user_id }]
     });
     return loans;
   }

@@ -5,7 +5,7 @@ import { app } from '@shared/infra/http/app';
 import { closeRedisConnection } from '@shared/infra/http/middlewares/rateLimiter';
 
 let connection: Connection;
-let refreshToken: string;
+let token: string;
 let contact_id: string;
 
 describe('Delete Loan Controller', () => {
@@ -13,8 +13,9 @@ describe('Delete Loan Controller', () => {
     connection = await createConnection();
     await connection.runMigrations();
 
-    // Creating a new user and fetching refresh token
+    // Creating a new user
     await request(app).post('/users').send({
+      name: 'John Doe',
       email: 'test@example.com',
       password: '12345'
     });
@@ -24,19 +25,31 @@ describe('Delete Loan Controller', () => {
       password: '12345'
     });
 
-    refreshToken = tokenResponse.body.refresh_token;
+    token = tokenResponse.body.token;
 
-    // Creating a new contact
-    const contactResponse = await request(app)
+    // Creating another user
+    await request(app).post('/users').send({
+      name: 'John Doe',
+      email: 'new@example.com',
+      password: '12345'
+    });
+
+    const contactResponse = await request(app).post('/session').send({
+      email: 'new@example.com',
+      password: '12345'
+    });
+
+    contact_id = contactResponse.body.user.id;
+
+    // Creatin the connection between the two users
+    await request(app)
       .post('/contacts')
       .send({
-        name: 'John Doe'
+        contact_id
       })
       .set({
-        Authorization: `Bearer ${refreshToken}`
+        Authorization: `Bearer ${token}`
       });
-
-    contact_id = contactResponse.body.id;
   });
 
   afterAll(async () => {
@@ -56,7 +69,7 @@ describe('Delete Loan Controller', () => {
         limit_date: new Date('2030-06-01')
       })
       .set({
-        Authorization: `Bearer ${refreshToken}`
+        Authorization: `Bearer ${token}`
       });
 
     const { id } = loanResponse.body;
@@ -64,7 +77,7 @@ describe('Delete Loan Controller', () => {
     const response = await request(app)
       .delete('/loans')
       .send({ id })
-      .set({ Authorization: `Bearer ${refreshToken}` });
+      .set({ Authorization: `Bearer ${token}` });
 
     expect(response.statusCode).toBe(200);
   });
@@ -73,7 +86,7 @@ describe('Delete Loan Controller', () => {
     const response = await request(app)
       .delete('/loans')
       .send({ id: '868272c3-c308-44e8-9a53-e0ccf61e9639' })
-      .set({ Authorization: `Bearer ${refreshToken}` });
+      .set({ Authorization: `Bearer ${token}` });
 
     expect(response.statusCode).toBe(400);
   });
@@ -89,19 +102,20 @@ describe('Delete Loan Controller', () => {
         limit_date: new Date('2030-06-01')
       })
       .set({
-        Authorization: `Bearer ${refreshToken}`
+        Authorization: `Bearer ${token}`
       });
 
     const { id } = loanResponse.body;
 
     // Creating a new user and fetching refresh token
     await request(app).post('/users').send({
-      email: 'new@example.com',
+      name: 'John Doe',
+      email: 'johndoe@example.com',
       password: '12345'
     });
 
     const tokenResponse = await request(app).post('/session').send({
-      email: 'new@example.com',
+      email: 'johndoe@example.com',
       password: '12345'
     });
 

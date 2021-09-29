@@ -25,6 +25,9 @@ class Payment {
   @Column()
   value: number;
 
+  @Column()
+  status: string;
+
   @CreateDateColumn()
   created_at: Date;
 

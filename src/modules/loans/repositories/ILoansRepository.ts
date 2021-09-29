@@ -4,8 +4,8 @@ import { Loan } from '../infra/typeorm/entities/Loan';
 
 interface ILoansRepository {
   create({
-    user_id,
-    contact_id,
+    payer_id,
+    receiver_id,
     value,
     type,
     fee,
@@ -14,8 +14,8 @@ interface ILoansRepository {
 
   update({
     id,
-    user_id,
-    contact_id,
+    payer_id,
+    receiver_id,
     value,
     type,
     limit_date,

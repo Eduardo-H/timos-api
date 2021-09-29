@@ -5,17 +5,17 @@ import { CreateContactUseCase } from './CreateContactUseCase';
 
 class CreateContactController {
   async handle(request: Request, response: Response): Promise<Response> {
-    const { name } = request.body;
-    const { id } = request.user;
+    const { contact_id } = request.body;
+    const { id: user_id } = request.user;
 
     const createContactUseCase = container.resolve(CreateContactUseCase);
 
-    const contact = await createContactUseCase.execute({
-      name,
-      user_id: id
+    await createContactUseCase.execute({
+      user_id,
+      contact_id
     });
 
-    return response.status(201).json(contact);
+    return response.status(201).send();
   }
 }
 

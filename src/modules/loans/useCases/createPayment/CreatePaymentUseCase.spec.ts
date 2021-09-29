@@ -47,11 +47,10 @@ describe('Create Payment', () => {
     );
 
     const user = await createUser(createUserUseCase, 'test@example.com');
-    const contact = await createContact(
-      createContactUseCase,
-      'John Doe',
-      user.id
-    );
+    const contact = await createUser(createUserUseCase, 'new@example.com');
+
+    await createContact(createContactUseCase, user.id, contact.id);
+
     const loan = await createLoan(
       createLoanUseCase,
       user.id,
@@ -73,6 +72,7 @@ describe('Create Payment', () => {
     expect(result).toHaveProperty('id');
     expect(result.loan_id).toEqual(loan_id);
     expect(result.value).toBe(50);
+    expect(result.status).toEqual('pendente');
   });
 
   it('should not be able to create a payment of a nonexistent loan', async () => {

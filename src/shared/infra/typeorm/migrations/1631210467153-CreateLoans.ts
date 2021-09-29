@@ -12,11 +12,11 @@ export class CreateLoans1631210467153 implements MigrationInterface {
             isPrimary: true
           },
           {
-            name: 'user_id',
+            name: 'receiver_id',
             type: 'uuid'
           },
           {
-            name: 'contact_id',
+            name: 'payer_id',
             type: 'uuid'
           },
           {
@@ -29,9 +29,14 @@ export class CreateLoans1631210467153 implements MigrationInterface {
             enum: ['pagar', 'receber']
           },
           {
+            name: 'fee',
+            type: 'numeric',
+            isNullable: true
+          },
+          {
             name: 'status',
             type: 'enum',
-            enum: ['aberto', 'pago']
+            enum: ['aberto', 'recusado', 'finalizado']
           },
           {
             name: 'limit_date',
@@ -56,18 +61,18 @@ export class CreateLoans1631210467153 implements MigrationInterface {
         ],
         foreignKeys: [
           {
-            name: 'FKUserLoan',
+            name: 'FKReceiverLoan',
             referencedTableName: 'users',
             referencedColumnNames: ['id'],
-            columnNames: ['user_id'],
+            columnNames: ['receiver_id'],
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE'
           },
           {
-            name: 'FKContactLoan',
-            referencedTableName: 'contacts',
+            name: 'FKPayerLoan',
+            referencedTableName: 'users',
             referencedColumnNames: ['id'],
-            columnNames: ['contact_id'],
+            columnNames: ['payer_id'],
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE'
           }

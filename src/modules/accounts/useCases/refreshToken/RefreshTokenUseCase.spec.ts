@@ -41,6 +41,7 @@ describe('Refresh Token', () => {
 
   it('should be able to generate a new refresh token', async () => {
     const user: ICreateUserDTO = {
+      name: 'John Doe',
       email: 'test@example.com',
       password: '12345'
     };

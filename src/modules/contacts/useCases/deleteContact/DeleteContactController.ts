@@ -5,12 +5,12 @@ import { DeleteContactUseCase } from './DeleteContactUseCase';
 
 class DeleteContactController {
   async handle(request: Request, response: Response): Promise<Response> {
-    const { id } = request.body;
+    const { contact_id } = request.body;
     const { id: user_id } = request.user;
 
     const deleteContactUseCase = container.resolve(DeleteContactUseCase);
 
-    await deleteContactUseCase.execute({ id, user_id });
+    await deleteContactUseCase.execute({ user_id, contact_id });
 
     return response.status(200).send();
   }

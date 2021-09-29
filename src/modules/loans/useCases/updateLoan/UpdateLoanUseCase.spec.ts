@@ -32,10 +32,7 @@ describe('Update Loan', () => {
     contactsRepositoryInMemory = new ContactsRepositoryInMemory();
     dateProvider = new DayjsDateProvider();
 
-    updateLoanUseCase = new UpdateLoanUseCase(
-      loansRepositoryInMemory,
-      contactsRepositoryInMemory
-    );
+    updateLoanUseCase = new UpdateLoanUseCase(loansRepositoryInMemory);
 
     createLoanUseCase = new CreateLoanUseCase(
       loansRepositoryInMemory,
@@ -46,11 +43,10 @@ describe('Update Loan', () => {
     createContactUseCase = new CreateContactUseCase(contactsRepositoryInMemory);
 
     const user = await createUser(createUserUseCase, 'test@example.com');
-    const contact = await createContact(
-      createContactUseCase,
-      'John Doe',
-      user.id
-    );
+    const contact = await createUser(createUserUseCase, 'new@example.com');
+
+    await createContact(createContactUseCase, user.id, contact.id);
+
     loan = await createLoan(
       createLoanUseCase,
       user.id,
@@ -66,7 +62,6 @@ describe('Update Loan', () => {
     const result = await updateLoanUseCase.execute({
       id: loan.id,
       user_id,
-      contact_id,
       value: 100,
       type: 'receber',
       limit_date: loan.limit_date,
@@ -75,20 +70,19 @@ describe('Update Loan', () => {
     });
 
     expect(result).toHaveProperty('id');
-    expect(result.user_id).toEqual(user_id);
-    expect(result.contact_id).toEqual(contact_id);
+    expect(result.receiver_id).toEqual(user_id);
+    expect(result.payer_id).toEqual(contact_id);
     expect(result.value).toBe(100);
     expect(result.type).toEqual('receber');
   });
 
   it("should not be able to update a loan with a contact that doesn't belong to the user", async () => {
-    const newUser = await createUser(createUserUseCase, 'new@example.com');
+    const newUser = await createUser(createUserUseCase, 'johndoe@example.com');
 
     await expect(
       updateLoanUseCase.execute({
         id: loan.id,
         user_id: newUser.id,
-        contact_id,
         value: 100,
         type: 'receber',
         limit_date: loan.limit_date,
@@ -96,7 +90,7 @@ describe('Update Loan', () => {
         status: loan.status
       })
     ).rejects.toEqual(
-      new AppError('This contact does not belong to the user', 401)
+      new AppError('This loan does not belong to the user', 401)
     );
   });
 
@@ -105,7 +99,6 @@ describe('Update Loan', () => {
       updateLoanUseCase.execute({
         id: loan.id,
         user_id,
-        contact_id,
         value: -1000,
         type: 'receber',
         limit_date: loan.limit_date,
@@ -120,7 +113,6 @@ describe('Update Loan', () => {
       updateLoanUseCase.execute({
         id: '123',
         user_id,
-        contact_id,
         value: 100,
         type: 'receber',
         limit_date: new Date(),
@@ -128,20 +120,5 @@ describe('Update Loan', () => {
         status: 'aberto'
       })
     ).rejects.toEqual(new AppError('Loan not found'));
-  });
-
-  it('should not be able to update a loan of a nonexistent contact', async () => {
-    await expect(
-      updateLoanUseCase.execute({
-        id: loan.id,
-        user_id,
-        contact_id: '123',
-        value: 50,
-        type: 'receber',
-        limit_date: loan.limit_date,
-        closed_at: loan.closed_at,
-        status: loan.status
-      })
-    ).rejects.toEqual(new AppError('Contact not found'));
   });
 });

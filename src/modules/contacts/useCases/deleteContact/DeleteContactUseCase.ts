@@ -4,8 +4,8 @@ import { inject, injectable } from 'tsyringe';
 import { AppError } from '@shared/errors/AppError';
 
 interface IPayload {
-  id: string;
   user_id: string;
+  contact_id: string;
 }
 
 @injectable()
@@ -15,18 +15,28 @@ class DeleteContactUseCase {
     private contactsRepository: IContactsRepository
   ) {}
 
-  async execute({ id, user_id }: IPayload): Promise<void> {
-    const contact = await this.contactsRepository.findById(id);
+  async execute({ user_id, contact_id }: IPayload): Promise<void> {
+    const contact = await this.contactsRepository.findConnection(
+      user_id,
+      contact_id
+    );
 
     if (!contact) {
-      throw new AppError('Contact not found');
+      throw new AppError("You're not connected to this user");
     }
 
-    if (contact.user_id !== user_id) {
-      throw new AppError('This contact does not belong to the user', 403);
-    }
+    // Removing the contact for the user that requested the deletion
+    await this.contactsRepository.deleteById(contact.id);
 
-    await this.contactsRepository.deleteById(id);
+    // Removing the contact for the other user
+    const otherContact = await this.contactsRepository.findConnection(
+      contact_id,
+      user_id
+    );
+
+    if (otherContact) {
+      await this.contactsRepository.deleteById(otherContact.id);
+    }
   }
 }
 

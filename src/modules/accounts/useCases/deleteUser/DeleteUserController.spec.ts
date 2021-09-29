@@ -5,7 +5,7 @@ import { app } from '@shared/infra/http/app';
 import { closeRedisConnection } from '@shared/infra/http/middlewares/rateLimiter';
 
 let connection: Connection;
-let refreshToken: string;
+let token: string;
 
 const wrongJWT =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwiZW1haWwiOiJ0ZXN0QGV4YW1wbGUifQ.KSOCK1xgysHEraNTu4wujkrCR7hfyeNj-TaAkDF5uHo';
@@ -16,6 +16,7 @@ describe('Delete User Controller', () => {
     await connection.runMigrations();
 
     await request(app).post('/users').send({
+      name: 'John Doe',
       email: 'test@example.com',
       password: '12345'
     });
@@ -24,7 +25,7 @@ describe('Delete User Controller', () => {
       .post('/session')
       .send({ email: 'test@example.com', password: '12345' });
 
-    refreshToken = tokenResponse.body.refresh_token;
+    token = tokenResponse.body.token;
   });
 
   afterAll(async () => {
@@ -40,7 +41,7 @@ describe('Delete User Controller', () => {
         password: '12345'
       })
       .set({
-        Authorization: `Bearer ${refreshToken}`
+        Authorization: `Bearer ${token}`
       });
 
     expect(response.statusCode).toBe(200);
@@ -66,7 +67,7 @@ describe('Delete User Controller', () => {
         password: 'wrong_password'
       })
       .set({
-        Authorization: `Bearer ${refreshToken}`
+        Authorization: `Bearer ${token}`
       });
 
     expect(response.statusCode).toBe(400);

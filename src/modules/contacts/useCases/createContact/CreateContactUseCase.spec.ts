@@ -1,4 +1,3 @@
-import { ICreateUserDTO } from '@modules/accounts/dtos/ICreateUserDTO';
 import { ContactsRepositoryInMemory } from '@modules/contacts/repositories/in-memory/ContactsRepositoryInMemory';
 
 import { AppError } from '@shared/errors/AppError';
@@ -16,39 +15,27 @@ describe('Create Contact', () => {
   });
 
   it('should be able to create a contact', async () => {
-    const user: ICreateUserDTO = {
-      id: '1234',
-      email: 'test@example.com',
-      password: '12345'
-    };
-
     const result = await createContactUseCase.execute({
-      name: 'John Doe',
-      user_id: user.id
+      user_id: '1234',
+      contact_id: '9876'
     });
 
     expect(result).toHaveProperty('id');
-    expect(result.name).toEqual('John Doe');
-    expect(result.user_id).toEqual(user.id);
+    expect(result.user_id).toEqual('1234');
+    expect(result.contact_id).toEqual('9876');
   });
 
   it('should not be able to create a repeated contact', async () => {
-    const user: ICreateUserDTO = {
-      id: '1234',
-      email: 'test@example.com',
-      password: '12345'
-    };
-
     await createContactUseCase.execute({
-      name: 'John Doe',
-      user_id: user.id
+      user_id: '1234',
+      contact_id: '9876'
     });
 
     await expect(
       createContactUseCase.execute({
-        name: 'John Doe',
-        user_id: user.id
+        user_id: '1234',
+        contact_id: '9876'
       })
-    ).rejects.toEqual(new AppError('Contact already exists'));
+    ).rejects.toEqual(new AppError('This connection already exists'));
   });
 });

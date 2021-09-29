@@ -11,7 +11,8 @@ class PaymentsRepositoryInMemory implements IPaymentsRepository {
 
     Object.assign(payment, {
       loan_id,
-      value
+      value,
+      status: 'pendente'
     });
 
     this.payments.push(payment);
