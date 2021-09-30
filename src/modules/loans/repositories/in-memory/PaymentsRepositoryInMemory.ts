@@ -27,6 +27,19 @@ class PaymentsRepositoryInMemory implements IPaymentsRepository {
 
     return payments;
   }
+
+  async findById(id: string): Promise<Payment> {
+    const payement = this.payments.find((payment) => payment.id === id);
+    return payement;
+  }
+
+  async updateStatusById(id: string, status: string): Promise<void> {
+    const payment = this.payments.find((payment) => payment.id === id);
+
+    Object.assign(payment, {
+      status
+    });
+  }
 }
 
 export { PaymentsRepositoryInMemory };

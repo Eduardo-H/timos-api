@@ -1,3 +1,4 @@
+import { AprovePaymentController } from '@modules/loans/useCases/aprovePayment/AprovePaymentController';
 import { CreateLoanController } from '@modules/loans/useCases/createLoan/CreateLoanController';
 import { CreatePaymentController } from '@modules/loans/useCases/createPayment/CreatePaymentController';
 import { DeleteLoanController } from '@modules/loans/useCases/deleteLoan/DeleteLoanController';
@@ -14,6 +15,7 @@ const updateLoanController = new UpdateLoanController();
 const deleteLoanController = new DeleteLoanController();
 const listLoansController = new ListLoansController();
 const createPaymentController = new CreatePaymentController();
+const aprovePaymentController = new AprovePaymentController();
 
 loansRoutes.post('/', ensureAuthenticated, createLoanController.handle);
 loansRoutes.put('/', ensureAuthenticated, updateLoanController.handle);
@@ -23,6 +25,11 @@ loansRoutes.post(
   '/payment',
   ensureAuthenticated,
   createPaymentController.handle
+);
+loansRoutes.patch(
+  '/payment/:id/aprove',
+  ensureAuthenticated,
+  aprovePaymentController.handle
 );
 
 export { loansRoutes };
