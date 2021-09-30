@@ -5,7 +5,7 @@ import { inject, injectable } from 'tsyringe';
 import { AppError } from '@shared/errors/AppError';
 
 @injectable()
-class AprovePaymentUseCase {
+class ApprovePaymentUseCase {
   constructor(
     @inject('PaymentsRepository')
     private paymentsRepository: IPaymentsRepository,
@@ -23,11 +23,11 @@ class AprovePaymentUseCase {
     const loan = await this.loansRepository.findById(payment.loan_id);
 
     if (user_id !== loan.receiver_id) {
-      throw new AppError('Only the receiver can aprove the payment', 401);
+      throw new AppError('Only the receiver can approve the payment', 401);
     }
 
     await this.paymentsRepository.updateStatusById(payment.id, 'aprovado');
   }
 }
 
-export { AprovePaymentUseCase };
+export { ApprovePaymentUseCase };

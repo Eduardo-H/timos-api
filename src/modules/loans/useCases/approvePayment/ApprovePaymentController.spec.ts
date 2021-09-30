@@ -9,7 +9,7 @@ let token: string;
 let contact_token: string;
 let payment_id: string;
 
-describe('Create Payment Controller', () => {
+describe('Approve Payment Controller', () => {
   beforeAll(async () => {
     connection = await createConnection();
     await connection.runMigrations();
@@ -66,6 +66,7 @@ describe('Create Payment Controller', () => {
         Authorization: `Bearer ${token}`
       });
 
+    // Creating a new payment for the loan
     const paymentResponse = await request(app)
       .post('/loans/payment')
       .send({
@@ -85,9 +86,9 @@ describe('Create Payment Controller', () => {
     closeRedisConnection();
   });
 
-  it('should be able to aprove a payement', async () => {
+  it('should be able to approve a payement', async () => {
     const response = await request(app)
-      .patch(`/loans/payment/${payment_id}/aprove`)
+      .patch(`/loans/payment/${payment_id}/approve`)
       .set({
         Authorization: `Bearer ${contact_token}`
       });
@@ -95,9 +96,9 @@ describe('Create Payment Controller', () => {
     expect(response.statusCode).toBe(201);
   });
 
-  it('should not be able to aprove a nonexistent payment', async () => {
+  it('should not be able to approve a nonexistent payment', async () => {
     const response = await request(app)
-      .patch('/loans/payment/868272c3-c308-44e8-9a53-e0ccf61e9639/aprove')
+      .patch('/loans/payment/868272c3-c308-44e8-9a53-e0ccf61e9639/approve')
       .set({
         Authorization: `Bearer ${contact_token}`
       });
@@ -105,9 +106,9 @@ describe('Create Payment Controller', () => {
     expect(response.statusCode).toBe(400);
   });
 
-  it('should not allow the payer to aprove a payment', async () => {
+  it('should not allow the payer to approve a payment', async () => {
     const response = await request(app)
-      .patch(`/loans/payment/${payment_id}/aprove`)
+      .patch(`/loans/payment/${payment_id}/approve`)
       .set({
         Authorization: `Bearer ${token}`
       });

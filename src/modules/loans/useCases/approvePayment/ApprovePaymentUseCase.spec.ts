@@ -16,9 +16,9 @@ import { AppError } from '@shared/errors/AppError';
 
 import { CreateLoanUseCase } from '../createLoan/CreateLoanUseCase';
 import { CreatePaymentUseCase } from '../createPayment/CreatePaymentUseCase';
-import { AprovePaymentUseCase } from './AprovePaymentUseCase';
+import { ApprovePaymentUseCase } from './ApprovePaymentUseCase';
 
-let aprovePaymentUseCase: AprovePaymentUseCase;
+let approvePaymentUseCase: ApprovePaymentUseCase;
 let createPaymentUseCase: CreatePaymentUseCase;
 let createUserUseCase: CreateUserUseCase;
 let createContactUseCase: CreateContactUseCase;
@@ -33,7 +33,7 @@ let user_id: string;
 let contact_id: string;
 let payment_id: string;
 
-describe('Aprove Payment', () => {
+describe('Approve Payment', () => {
   beforeEach(async () => {
     paymentsRepositoryInMemory = new PaymentsRepositoryInMemory();
     usersRepositoryInMemory = new UsersRepositoryInMemory();
@@ -41,7 +41,7 @@ describe('Aprove Payment', () => {
     loansRepositoryInMemory = new LoansRepositoryInMemory();
     dateProvider = new DayjsDateProvider();
 
-    aprovePaymentUseCase = new AprovePaymentUseCase(
+    approvePaymentUseCase = new ApprovePaymentUseCase(
       paymentsRepositoryInMemory,
       loansRepositoryInMemory
     );
@@ -77,23 +77,23 @@ describe('Aprove Payment', () => {
     payment_id = payment.id;
   });
 
-  it('should be able to aprove a payment', async () => {
-    const result = await aprovePaymentUseCase.execute(payment_id, contact_id);
+  it('should be able to approve a payment', async () => {
+    const result = await approvePaymentUseCase.execute(payment_id, contact_id);
 
     expect(result).toBeUndefined();
   });
 
-  it('should not be able to aprove a nonexistent payment', async () => {
+  it('should not be able to approve a nonexistent payment', async () => {
     await expect(
-      aprovePaymentUseCase.execute('123', contact_id)
+      approvePaymentUseCase.execute('123', contact_id)
     ).rejects.toEqual(new AppError('Payment not found'));
   });
 
-  it('should not allow the payer to aprove a payment', async () => {
+  it('should not allow the payer to approve a payment', async () => {
     await expect(
-      aprovePaymentUseCase.execute(payment_id, user_id)
+      approvePaymentUseCase.execute(payment_id, user_id)
     ).rejects.toEqual(
-      new AppError('Only the receiver can aprove the payment', 401)
+      new AppError('Only the receiver can approve the payment', 401)
     );
   });
 });
