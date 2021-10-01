@@ -3,7 +3,9 @@ import { UserTokensRepository } from '@modules/accounts/infra/typeorm/repositori
 import { IUsersRepository } from '@modules/accounts/repositories/IUsersRepository';
 import { IUsersTokensRepository } from '@modules/accounts/repositories/IUsersTokensRepository';
 import { ContactsRepository } from '@modules/contacts/infra/typeorm/repositories/ContactsRepository';
+import { ContactsRequestsRepository } from '@modules/contacts/infra/typeorm/repositories/ContactsRequestsRepository';
 import { IContactsRepository } from '@modules/contacts/repositories/IContactsRepository';
+import { IContactsRequestsRepository } from '@modules/contacts/repositories/IContactsRequestsRepository';
 import { LoansRepository } from '@modules/loans/infra/typeorm/repositories/LoansRepository';
 import { PaymentsRepository } from '@modules/loans/infra/typeorm/repositories/PaymentsRepository';
 import { ILoansRepository } from '@modules/loans/repositories/ILoansRepository';
@@ -34,4 +36,9 @@ container.registerSingleton<ILoansRepository>(
 container.registerSingleton<IPaymentsRepository>(
   'PaymentsRepository',
   PaymentsRepository
+);
+
+container.registerSingleton<IContactsRequestsRepository>(
+  'ContactsRequestsRepository',
+  ContactsRequestsRepository
 );
