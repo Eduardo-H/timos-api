@@ -19,12 +19,12 @@ contactsRoutes.post('/', ensureAuthenticated, createContactController.handle);
 contactsRoutes.delete('/', ensureAuthenticated, deleteContactController.handle);
 contactsRoutes.get('/', ensureAuthenticated, listContactsController.handle);
 contactsRoutes.post(
-  '/request',
+  '/requests',
   ensureAuthenticated,
   createContactRequestController.handle
 );
 contactsRoutes.delete(
-  '/request/:id/refuse',
+  '/requests/:id/refuse',
   ensureAuthenticated,
   refuseContactRequestController.handle
 );

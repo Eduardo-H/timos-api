@@ -51,7 +51,7 @@ describe('Create Contact Request Controller', () => {
 
   it('should be able to create a contact request', async () => {
     const response = await request(app)
-      .post('/contacts/request')
+      .post('/contacts/requests')
       .send({
         user_id
       })
@@ -62,7 +62,7 @@ describe('Create Contact Request Controller', () => {
 
   it('should not be able to create a repeated contact request', async () => {
     const response = await request(app)
-      .post('/contacts/request')
+      .post('/contacts/requests')
       .send({
         user_id
       })
@@ -80,7 +80,7 @@ describe('Create Contact Request Controller', () => {
       .set({ Authorization: `Bearer ${token}` });
 
     const response = await request(app)
-      .post('/contacts/request')
+      .post('/contacts/requests')
       .send({
         user_id
       })
@@ -91,7 +91,7 @@ describe('Create Contact Request Controller', () => {
 
   it('should not be able to create a contact request for a nonexistent user', async () => {
     const response = await request(app)
-      .post('/contacts/request')
+      .post('/contacts/requests')
       .send({
         user_id: 'c4d4ff24-a5d6-4605-81bf-ba6c373a72a5'
       })
@@ -102,7 +102,7 @@ describe('Create Contact Request Controller', () => {
 
   it('should not be able to create a contact request for a not logged in user', async () => {
     const response = await request(app)
-      .post('/contacts/request')
+      .post('/contacts/requests')
       .send({
         user_id
       })

@@ -51,7 +51,7 @@ describe('Refuse Contact Request Controller', () => {
 
   it('should be able to refuse a contact request', async () => {
     const contactRequestResponse = await request(app)
-      .post('/contacts/request')
+      .post('/contacts/requests')
       .send({
         user_id
       })
@@ -60,7 +60,7 @@ describe('Refuse Contact Request Controller', () => {
     const { id } = contactRequestResponse.body;
 
     const response = await request(app)
-      .delete(`/contacts/request/${id}/refuse`)
+      .delete(`/contacts/requests/${id}/refuse`)
       .set({ Authorization: `Bearer ${token}` });
 
     expect(response.statusCode).toBe(200);
@@ -68,7 +68,7 @@ describe('Refuse Contact Request Controller', () => {
 
   it('should not be able to refuse a nonexistent contact request', async () => {
     const response = await request(app)
-      .delete(`/contacts/request/c4d4ff24-a5d6-4605-81bf-ba6c373a72a5/refuse`)
+      .delete(`/contacts/requests/c4d4ff24-a5d6-4605-81bf-ba6c373a72a5/refuse`)
       .set({ Authorization: `Bearer ${token}` });
 
     expect(response.statusCode).toBe(400);
@@ -76,7 +76,7 @@ describe('Refuse Contact Request Controller', () => {
 
   it('should not allow an user that is not a part of the contact request to refuse it', async () => {
     const contactRequestResponse = await request(app)
-      .post('/contacts/request')
+      .post('/contacts/requests')
       .send({
         user_id
       })
@@ -98,7 +98,7 @@ describe('Refuse Contact Request Controller', () => {
     const newUserToken = tokenResponse.body.token;
 
     const response = await request(app)
-      .delete(`/contacts/request/${id}/refuse`)
+      .delete(`/contacts/requests/${id}/refuse`)
       .set({ Authorization: `Bearer ${newUserToken}` });
 
     expect(response.statusCode).toBe(401);
@@ -106,7 +106,7 @@ describe('Refuse Contact Request Controller', () => {
 
   it('should not be able to refuse a contact request if the user is not logged in', async () => {
     const contactRequestResponse = await request(app)
-      .post('/contacts/request')
+      .post('/contacts/requests')
       .send({
         user_id
       })
@@ -115,7 +115,7 @@ describe('Refuse Contact Request Controller', () => {
     const { id } = contactRequestResponse.body;
 
     const response = await request(app)
-      .delete(`/contacts/request/${id}/refuse`)
+      .delete(`/contacts/requests/${id}/refuse`)
       .set({ Authorization: `Bearer ${wrongJWT}` });
 
     expect(response.statusCode).toBe(401);
