@@ -35,6 +35,19 @@ class ContactsRequestsRepositoryInMemory
 
     return contactRequest;
   }
+
+  async findById(id: string): Promise<ContactRequest> {
+    const request = this.contactsRequest.find((request) => request.id === id);
+    return request;
+  }
+
+  async deleteById(id: string): Promise<void> {
+    const index = this.contactsRequest.findIndex(
+      (request) => request.id === id
+    );
+
+    this.contactsRequest.splice(index, 1);
+  }
 }
 
 export { ContactsRequestsRepositoryInMemory };

@@ -10,6 +10,8 @@ interface IContactsRequestsRepository {
     user_id: string,
     requester_id: string
   ): Promise<ContactRequest>;
+  findById(id: string): Promise<ContactRequest>;
+  deleteById(id: string): Promise<void>;
 }
 
 export { IContactsRequestsRepository };
