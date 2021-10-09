@@ -2,7 +2,7 @@ import { User } from '@modules/accounts/infra/typeorm/entities/User';
 import { CreateUserUseCase } from '@modules/accounts/useCases/createUser/CreateUserUseCase';
 import { Contact } from '@modules/contacts/infra/typeorm/entities/Contact';
 import { ContactRequest } from '@modules/contacts/infra/typeorm/entities/ContactRequest';
-import { CreateContactUseCase } from '@modules/contacts/useCases/createContact/CreateContactUseCase';
+import { AcceptContactRequestUseCase } from '@modules/contacts/useCases/acceptContactRequest/AcceptContactRequestUseCase';
 import { CreateContactRequestUseCase } from '@modules/contacts/useCases/createContactRequest/CreateContactRequestUseCase';
 import { Loan } from '@modules/loans/infra/typeorm/entities/Loan';
 import { Payment } from '@modules/loans/infra/typeorm/entities/Payment';
@@ -22,13 +22,13 @@ async function createUser(
 }
 
 async function createContact(
-  createContactUseCase: CreateContactUseCase,
-  user_id: string,
-  contact_id: string
+  acceptContactRequestUseCase: AcceptContactRequestUseCase,
+  id: string,
+  user_id: string
 ): Promise<Contact> {
-  const contact = await createContactUseCase.execute({
-    user_id,
-    contact_id
+  const contact = await acceptContactRequestUseCase.execute({
+    id,
+    user_id
   });
   return contact;
 }

@@ -7,8 +7,9 @@ import { closeRedisConnection } from '@shared/infra/http/middlewares/rateLimiter
 let connection: Connection;
 let token: string;
 let contact_id: string;
+let contact_token: string;
 
-describe('Create Contact Controller', () => {
+describe('Accept Contact Request Controller', () => {
   beforeAll(async () => {
     connection = await createConnection();
     await connection.runMigrations();
@@ -38,6 +39,7 @@ describe('Create Contact Controller', () => {
     });
 
     contact_id = responseContact.body.user.id;
+    contact_token = responseContact.body.token;
   });
 
   afterAll(async () => {
@@ -46,29 +48,54 @@ describe('Create Contact Controller', () => {
     closeRedisConnection();
   });
 
-  it('should be able to create a new contact', async () => {
-    const response = await request(app)
-      .post('/contacts')
+  it('should be able to accept a contact request', async () => {
+    const contactRequestResponse = await request(app)
+      .post('/contacts/requests')
       .send({
-        contact_id
+        user_id: contact_id
       })
+      .set({ Authorization: `Bearer ${token}` });
+
+    const { id } = contactRequestResponse.body;
+
+    const response = await request(app)
+      .post(`/contacts/requests/${id}/accept`)
       .set({
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${contact_token}`
       });
 
     expect(response.statusCode).toBe(201);
   });
 
-  it('should not be able to create a repeated contact', async () => {
-    const response = await request(app)
-      .post('/contacts')
+  it('should not allow requester to accept a contact request', async () => {
+    await request(app).post('/users').send({
+      name: 'John Doe',
+      email: 'johndoe@example.com',
+      password: '12345'
+    });
+
+    const responseContact = await request(app).post('/session').send({
+      email: 'johndoe@example.com',
+      password: '12345'
+    });
+
+    const newUserId = responseContact.body.user.id;
+
+    const contactRequestResponse = await request(app)
+      .post('/contacts/requests')
       .send({
-        contact_id
+        user_id: newUserId
       })
+      .set({ Authorization: `Bearer ${token}` });
+
+    const { id } = contactRequestResponse.body;
+
+    const response = await request(app)
+      .post(`/contacts/requests/${id}/accept`)
       .set({
         Authorization: `Bearer ${token}`
       });
 
-    expect(response.statusCode).toBe(400);
+    expect(response.statusCode).toBe(401);
   });
 });

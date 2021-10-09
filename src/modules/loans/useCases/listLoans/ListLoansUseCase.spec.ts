@@ -1,14 +1,17 @@
 import { UsersRepositoryInMemory } from '@modules/accounts/repositories/in-memory/UsersRepositoryInMemory';
 import { CreateUserUseCase } from '@modules/accounts/useCases/createUser/CreateUserUseCase';
 import { ContactsRepositoryInMemory } from '@modules/contacts/repositories/in-memory/ContactsRepositoryInMemory';
-import { CreateContactUseCase } from '@modules/contacts/useCases/createContact/CreateContactUseCase';
+import { ContactsRequestsRepositoryInMemory } from '@modules/contacts/repositories/in-memory/ContactsRequestsRepositoryInMemory';
+import { AcceptContactRequestUseCase } from '@modules/contacts/useCases/acceptContactRequest/AcceptContactRequestUseCase';
+import { CreateContactRequestUseCase } from '@modules/contacts/useCases/createContactRequest/CreateContactRequestUseCase';
 import { LoansRepositoryInMemory } from '@modules/loans/repositories/in-memory/LoansRepositoryInMemory';
 import { PaymentsRepositoryInMemory } from '@modules/loans/repositories/in-memory/PaymentsRepositoryInMemory';
 import {
   createUser,
   createLoan,
   createContact,
-  createPayment
+  createPayment,
+  createContactRequest
 } from '@utils/seed';
 
 import { DayjsDateProvider } from '@shared/container/providers/DateProvider/implementations/DayjsDateProvider';
@@ -21,11 +24,14 @@ import { ListLoansUseCase } from './ListLoansUseCase';
 let listLoansUseCase: ListLoansUseCase;
 let createLoanUseCase: CreateLoanUseCase;
 let createUserUseCase: CreateUserUseCase;
-let createContactUseCase: CreateContactUseCase;
+let createContactRequestUseCase: CreateContactRequestUseCase;
+let acceptContactRequestUseCase: AcceptContactRequestUseCase;
 let createPaymentUseCase: CreatePaymentUseCase;
+
 let loansRepositoryInMemory: LoansRepositoryInMemory;
 let usersRepositoryInMemory: UsersRepositoryInMemory;
 let contactsRepositoryInMemory: ContactsRepositoryInMemory;
+let contactsRequestsRepositoryInMemory: ContactsRequestsRepositoryInMemory;
 let paymentsRepositoryInMemory: PaymentsRepositoryInMemory;
 let dateProvider: DayjsDateProvider;
 
@@ -37,6 +43,8 @@ describe('List Loans', () => {
     loansRepositoryInMemory = new LoansRepositoryInMemory();
     usersRepositoryInMemory = new UsersRepositoryInMemory();
     contactsRepositoryInMemory = new ContactsRepositoryInMemory();
+    contactsRequestsRepositoryInMemory =
+      new ContactsRequestsRepositoryInMemory();
     paymentsRepositoryInMemory = new PaymentsRepositoryInMemory();
     dateProvider = new DayjsDateProvider();
 
@@ -51,7 +59,15 @@ describe('List Loans', () => {
       dateProvider
     );
     createUserUseCase = new CreateUserUseCase(usersRepositoryInMemory);
-    createContactUseCase = new CreateContactUseCase(contactsRepositoryInMemory);
+    acceptContactRequestUseCase = new AcceptContactRequestUseCase(
+      contactsRequestsRepositoryInMemory,
+      contactsRepositoryInMemory
+    );
+    createContactRequestUseCase = new CreateContactRequestUseCase(
+      contactsRequestsRepositoryInMemory,
+      usersRepositoryInMemory,
+      contactsRepositoryInMemory
+    );
     createPaymentUseCase = new CreatePaymentUseCase(
       paymentsRepositoryInMemory,
       loansRepositoryInMemory
@@ -60,7 +76,17 @@ describe('List Loans', () => {
     const user = await createUser(createUserUseCase, 'test@example.com');
     const contact = await createUser(createUserUseCase, 'new@example.com');
 
-    await createContact(createContactUseCase, user.id, contact.id);
+    const contactRequest = await createContactRequest(
+      createContactRequestUseCase,
+      user.id,
+      contact.id
+    );
+
+    await createContact(
+      acceptContactRequestUseCase,
+      contactRequest.id,
+      user.id
+    );
 
     const loan = await createLoan(
       createLoanUseCase,

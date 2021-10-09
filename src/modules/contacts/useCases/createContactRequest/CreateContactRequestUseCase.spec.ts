@@ -6,12 +6,13 @@ import { createContact, createUser } from '@utils/seed';
 
 import { AppError } from '@shared/errors/AppError';
 
-import { CreateContactUseCase } from '../createContact/CreateContactUseCase';
+import { AcceptContactRequestUseCase } from '../acceptContactRequest/AcceptContactRequestUseCase';
 import { CreateContactRequestUseCase } from './CreateContactRequestUseCase';
 
 let createContactRequestUseCase: CreateContactRequestUseCase;
 let createUserUseCase: CreateUserUseCase;
-let createContactUseCase: CreateContactUseCase;
+let acceptContactRequestUseCase: AcceptContactRequestUseCase;
+
 let contactsRequestsRepositoryInMemory: ContactsRequestsRepositoryInMemory;
 let usersRepositoryInMemory: UsersRepositoryInMemory;
 let contactsRepositoryInMemory: ContactsRepositoryInMemory;
@@ -33,7 +34,10 @@ describe('Create Contact Request', () => {
     );
 
     createUserUseCase = new CreateUserUseCase(usersRepositoryInMemory);
-    createContactUseCase = new CreateContactUseCase(contactsRepositoryInMemory);
+    acceptContactRequestUseCase = new AcceptContactRequestUseCase(
+      contactsRequestsRepositoryInMemory,
+      contactsRepositoryInMemory
+    );
 
     const requester = await createUser(createUserUseCase, 'test@example.com');
     const anotherUser = await createUser(createUserUseCase, 'new@example.com');
@@ -68,7 +72,11 @@ describe('Create Contact Request', () => {
   });
 
   it('should not be able to create a contact request when the users are already connected', async () => {
-    await createContact(createContactUseCase, requester_id, user_id);
+    const request = await createContactRequestUseCase.execute({
+      user_id,
+      requester_id
+    });
+    await createContact(acceptContactRequestUseCase, request.id, user_id);
 
     await expect(
       createContactRequestUseCase.execute({

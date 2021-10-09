@@ -2,78 +2,75 @@ import { UsersRepositoryInMemory } from '@modules/accounts/repositories/in-memor
 import { CreateUserUseCase } from '@modules/accounts/useCases/createUser/CreateUserUseCase';
 import { ContactsRepositoryInMemory } from '@modules/contacts/repositories/in-memory/ContactsRepositoryInMemory';
 import { ContactsRequestsRepositoryInMemory } from '@modules/contacts/repositories/in-memory/ContactsRequestsRepositoryInMemory';
-import { createContactRequest, createUser } from '@utils/seed';
+import { createUser } from '@utils/seed';
 
 import { AppError } from '@shared/errors/AppError';
 
-import { AcceptContactRequestUseCase } from '../acceptContactRequest/AcceptContactRequestUseCase';
 import { CreateContactRequestUseCase } from '../createContactRequest/CreateContactRequestUseCase';
-import { DeleteContactUseCase } from './DeleteContactUseCase';
+import { AcceptContactRequestUseCase } from './AcceptContactRequestUseCase';
 
-let deleteContactUseCase: DeleteContactUseCase;
-let createUserUseCase: CreateUserUseCase;
-let createContactRequestUseCase: CreateContactRequestUseCase;
 let acceptContactRequestUseCase: AcceptContactRequestUseCase;
+let createContactRequestUseCase: CreateContactRequestUseCase;
+let createUserUseCase: CreateUserUseCase;
 let contactsRequestsRepositoryInMemory: ContactsRequestsRepositoryInMemory;
-let contactsRepositoryInMemory: ContactsRepositoryInMemory;
 let usersRepositoryInMemory: UsersRepositoryInMemory;
+let contactsRepositoryInMemory: ContactsRepositoryInMemory;
 
 let request_id: string;
 let user_id: string;
 let contact_id: string;
 
-describe('Delete Contact', () => {
+describe('Accept Contact Request', () => {
   beforeEach(async () => {
     contactsRepositoryInMemory = new ContactsRepositoryInMemory();
+    usersRepositoryInMemory = new UsersRepositoryInMemory();
     contactsRequestsRepositoryInMemory =
       new ContactsRequestsRepositoryInMemory();
-    usersRepositoryInMemory = new UsersRepositoryInMemory();
 
-    deleteContactUseCase = new DeleteContactUseCase(contactsRepositoryInMemory);
-
-    createUserUseCase = new CreateUserUseCase(usersRepositoryInMemory);
     acceptContactRequestUseCase = new AcceptContactRequestUseCase(
       contactsRequestsRepositoryInMemory,
       contactsRepositoryInMemory
     );
+
     createContactRequestUseCase = new CreateContactRequestUseCase(
       contactsRequestsRepositoryInMemory,
       usersRepositoryInMemory,
       contactsRepositoryInMemory
     );
+    createUserUseCase = new CreateUserUseCase(usersRepositoryInMemory);
 
-    const requester = await createUser(createUserUseCase, 'test@example.com');
+    const user = await createUser(createUserUseCase, 'test@example.com');
     const anotherUser = await createUser(createUserUseCase, 'new@example.com');
 
-    user_id = anotherUser.id;
-    contact_id = requester.id;
-
-    const contactRequest = await createContactRequest(
-      createContactRequestUseCase,
-      user_id,
-      contact_id
-    );
+    const contactRequest = await createContactRequestUseCase.execute({
+      user_id: user.id,
+      requester_id: anotherUser.id
+    });
 
     request_id = contactRequest.id;
+    user_id = user.id;
+    contact_id = anotherUser.id;
   });
 
-  it('should be able to delete a contact', async () => {
-    await acceptContactRequestUseCase.execute({
+  it('should be able to accept a contact request', async () => {
+    const result = await acceptContactRequestUseCase.execute({
       id: request_id,
       user_id
     });
 
-    const result = await deleteContactUseCase.execute({
-      user_id,
-      contact_id
-    });
-
-    expect(result).toBeUndefined();
+    expect(result).toHaveProperty('id');
+    expect(result.user_id).toEqual(user_id);
+    expect(result.contact_id).toEqual(contact_id);
   });
 
-  it('should not be able to delete a nonexistent contact', async () => {
+  it('should not allow requester to accept a contact request', async () => {
     await expect(
-      deleteContactUseCase.execute({ user_id: '123', contact_id })
-    ).rejects.toEqual(new AppError("You're not connected to this user"));
+      acceptContactRequestUseCase.execute({
+        id: request_id,
+        user_id: contact_id
+      })
+    ).rejects.toEqual(
+      new AppError("This user can't accept this contact request", 401)
+    );
   });
 });

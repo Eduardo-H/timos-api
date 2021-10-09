@@ -1,18 +1,22 @@
 import { UsersRepositoryInMemory } from '@modules/accounts/repositories/in-memory/UsersRepositoryInMemory';
 import { CreateUserUseCase } from '@modules/accounts/useCases/createUser/CreateUserUseCase';
 import { ContactsRepositoryInMemory } from '@modules/contacts/repositories/in-memory/ContactsRepositoryInMemory';
-import { createContact, createUser } from '@utils/seed';
+import { ContactsRequestsRepositoryInMemory } from '@modules/contacts/repositories/in-memory/ContactsRequestsRepositoryInMemory';
+import { createContact, createContactRequest, createUser } from '@utils/seed';
 
 import { AppError } from '@shared/errors/AppError';
 
-import { CreateContactUseCase } from '../createContact/CreateContactUseCase';
+import { AcceptContactRequestUseCase } from '../acceptContactRequest/AcceptContactRequestUseCase';
+import { CreateContactRequestUseCase } from '../createContactRequest/CreateContactRequestUseCase';
 import { ListContactsUseCase } from './ListContactsUseCase';
 
 let listContactsUseCase: ListContactsUseCase;
 let createUserUseCase: CreateUserUseCase;
-let createContactUseCase: CreateContactUseCase;
+let createContactRequestUseCase: CreateContactRequestUseCase;
+let acceptContactRequestUseCase: AcceptContactRequestUseCase;
 let usersRepositoryInMemory: UsersRepositoryInMemory;
 let contactsRepositoryInMemory: ContactsRepositoryInMemory;
+let contactsRequestsRepositoryInMemory: ContactsRequestsRepositoryInMemory;
 
 let user_id: string;
 let first_contact_id: string;
@@ -20,28 +24,49 @@ let second_contact_id: string;
 
 describe('List Contacts', () => {
   beforeEach(async () => {
+    contactsRequestsRepositoryInMemory =
+      new ContactsRequestsRepositoryInMemory();
     contactsRepositoryInMemory = new ContactsRepositoryInMemory();
     usersRepositoryInMemory = new UsersRepositoryInMemory();
 
     listContactsUseCase = new ListContactsUseCase(contactsRepositoryInMemory);
+
     createUserUseCase = new CreateUserUseCase(usersRepositoryInMemory);
-    createContactUseCase = new CreateContactUseCase(contactsRepositoryInMemory);
-
-    const user = await createUser(createUserUseCase, 'test@example.com');
-    user_id = user.id;
-
-    const userContact = await createUser(createUserUseCase, 'new@example.com');
-    const anotherContact = await createUser(
-      createUserUseCase,
-      'johndoe@example.com'
+    acceptContactRequestUseCase = new AcceptContactRequestUseCase(
+      contactsRequestsRepositoryInMemory,
+      contactsRepositoryInMemory
+    );
+    createContactRequestUseCase = new CreateContactRequestUseCase(
+      contactsRequestsRepositoryInMemory,
+      usersRepositoryInMemory,
+      contactsRepositoryInMemory
     );
 
-    first_contact_id = userContact.id;
-    second_contact_id = anotherContact.id;
+    // Creating users
+    const user = await createUser(createUserUseCase, 'test@example.com');
+    const secondUser = await createUser(createUserUseCase, 'new@example.com');
+    const thirdUser = await createUser(createUserUseCase, 'john@example.com');
 
-    // Creating contacts for the user
-    await createContact(createContactUseCase, user_id, userContact.id);
-    await createContact(createContactUseCase, user_id, anotherContact.id);
+    // Creating connection requests
+    const firtsRequest = await createContactRequest(
+      createContactRequestUseCase,
+      user.id,
+      secondUser.id
+    );
+
+    const secondRequest = await createContactRequest(
+      createContactRequestUseCase,
+      user.id,
+      thirdUser.id
+    );
+
+    // Accepting connection requests
+    await createContact(acceptContactRequestUseCase, firtsRequest.id, user.id);
+    await createContact(acceptContactRequestUseCase, secondRequest.id, user.id);
+
+    user_id = user.id;
+    first_contact_id = secondUser.id;
+    second_contact_id = thirdUser.id;
   });
 
   it('should be able to list the users contacts', async () => {

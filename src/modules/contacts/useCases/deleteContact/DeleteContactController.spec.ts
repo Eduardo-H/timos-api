@@ -7,6 +7,7 @@ import { closeRedisConnection } from '@shared/infra/http/middlewares/rateLimiter
 let connection: Connection;
 let token: string;
 let contact_id: string;
+let contact_token: string;
 
 describe('Delete Contact Controller', () => {
   beforeAll(async () => {
@@ -38,6 +39,7 @@ describe('Delete Contact Controller', () => {
     });
 
     contact_id = responseContact.body.user.id;
+    contact_token = responseContact.body.token;
   });
 
   afterAll(async () => {
@@ -47,13 +49,19 @@ describe('Delete Contact Controller', () => {
   });
 
   it('should be able to delete a contact', async () => {
-    await request(app)
-      .post('/contacts')
+    const contactRequestResponse = await request(app)
+      .post('/contacts/requests')
       .send({
-        contact_id
+        user_id: contact_id
       })
+      .set({ Authorization: `Bearer ${token}` });
+
+    const request_id = contactRequestResponse.body.id;
+
+    await request(app)
+      .post(`/contacts/requests/${request_id}/accept`)
       .set({
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${contact_token}`
       });
 
     const response = await request(app)
@@ -83,13 +91,19 @@ describe('Delete Contact Controller', () => {
 
   it('should not be able to delete of a different user', async () => {
     // Creating a new contact
-    await request(app)
-      .post('/contacts')
+    const contactRequestResponse = await request(app)
+      .post('/contacts/requests')
       .send({
-        contact_id
+        user_id: contact_id
       })
+      .set({ Authorization: `Bearer ${token}` });
+
+    const request_id = contactRequestResponse.body.id;
+
+    await request(app)
+      .post(`/contacts/requests/${request_id}/accept`)
       .set({
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${contact_token}`
       });
 
     // Creating a new user and fetching its refresh token

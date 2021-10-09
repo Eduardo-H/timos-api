@@ -43,15 +43,22 @@ describe('Create Payment Controller', () => {
     });
 
     const contact_id = contactResponse.body.user.id;
+    const contact_token = contactResponse.body.token;
 
     // Creatin the connection between the two users
-    await request(app)
-      .post('/contacts')
+    const contactRequestResponse = await request(app)
+      .post('/contacts/requests')
       .send({
-        contact_id
+        user_id: contact_id
       })
+      .set({ Authorization: `Bearer ${token}` });
+
+    const request_id = contactRequestResponse.body.id;
+
+    await request(app)
+      .post(`/contacts/requests/${request_id}/accept`)
       .set({
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${contact_token}`
       });
 
     // Creating a new loan between the two users
