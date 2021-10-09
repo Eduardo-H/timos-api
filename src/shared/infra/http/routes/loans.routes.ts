@@ -4,6 +4,7 @@ import { CreateLoanController } from '@modules/loans/useCases/createLoan/CreateL
 import { CreatePaymentController } from '@modules/loans/useCases/createPayment/CreatePaymentController';
 import { DeleteLoanController } from '@modules/loans/useCases/deleteLoan/DeleteLoanController';
 import { ListLoansController } from '@modules/loans/useCases/listLoans/ListLoansController';
+import { RefuseLoanController } from '@modules/loans/useCases/refuseLoan/RefuseLoanController';
 import { RefusePaymentController } from '@modules/loans/useCases/refusePayment/RefusePaymentController';
 import { UpdateLoanController } from '@modules/loans/useCases/updateLoan/UpdateLoanController';
 import { Router } from 'express';
@@ -17,6 +18,7 @@ const updateLoanController = new UpdateLoanController();
 const deleteLoanController = new DeleteLoanController();
 const listLoansController = new ListLoansController();
 const approveLoanController = new ApproveLoanController();
+const refuseLoanController = new RefuseLoanController();
 const createPaymentController = new CreatePaymentController();
 const approvePaymentController = new ApprovePaymentController();
 const refusePaymentController = new RefusePaymentController();
@@ -29,6 +31,11 @@ loansRoutes.patch(
   '/:id/approve',
   ensureAuthenticated,
   approveLoanController.handle
+);
+loansRoutes.delete(
+  '/:id/refuse',
+  ensureAuthenticated,
+  refuseLoanController.handle
 );
 
 loansRoutes.post(
