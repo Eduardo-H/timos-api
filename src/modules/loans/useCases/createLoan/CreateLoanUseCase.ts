@@ -77,7 +77,8 @@ class CreateLoanUseCase {
       value: finalValue,
       type,
       fee,
-      limit_date
+      limit_date,
+      creator_id: user_id
     });
 
     return loan;

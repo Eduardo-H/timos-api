@@ -5,43 +5,46 @@ import { ContactsRequestsRepositoryInMemory } from '@modules/contacts/repositori
 import { AcceptContactRequestUseCase } from '@modules/contacts/useCases/acceptContactRequest/AcceptContactRequestUseCase';
 import { CreateContactRequestUseCase } from '@modules/contacts/useCases/createContactRequest/CreateContactRequestUseCase';
 import { LoansRepositoryInMemory } from '@modules/loans/repositories/in-memory/LoansRepositoryInMemory';
-import { createContact, createContactRequest, createUser } from '@utils/seed';
+import {
+  createContact,
+  createContactRequest,
+  createLoan,
+  createUser
+} from '@utils/seed';
 
 import { DayjsDateProvider } from '@shared/container/providers/DateProvider/implementations/DayjsDateProvider';
 import { AppError } from '@shared/errors/AppError';
 
-import { CreateLoanUseCase } from './CreateLoanUseCase';
+import { CreateLoanUseCase } from '../createLoan/CreateLoanUseCase';
+import { ApproveLoanUseCase } from './ApproveLoanUseCase';
 
-let createLoanUseCase: CreateLoanUseCase;
+let approveLoanUseCase: ApproveLoanUseCase;
 let createUserUseCase: CreateUserUseCase;
 let createContactRequestUseCase: CreateContactRequestUseCase;
 let acceptContactRequestUseCase: AcceptContactRequestUseCase;
+let createLoanUseCase: CreateLoanUseCase;
 
-let loansRepositoryInMemory: LoansRepositoryInMemory;
 let usersRepositoryInMemory: UsersRepositoryInMemory;
 let contactsRepositoryInMemory: ContactsRepositoryInMemory;
 let contactsRequestsRepositoryInMemory: ContactsRequestsRepositoryInMemory;
+let loansRepositoryInMemory: LoansRepositoryInMemory;
 let dateProvider: DayjsDateProvider;
 
 let user_id: string;
 let contact_id: string;
+let loan_id: string;
 
-describe('Create Loan', () => {
+describe('Approve Loan', () => {
   beforeEach(async () => {
-    loansRepositoryInMemory = new LoansRepositoryInMemory();
     usersRepositoryInMemory = new UsersRepositoryInMemory();
     contactsRepositoryInMemory = new ContactsRepositoryInMemory();
     contactsRequestsRepositoryInMemory =
       new ContactsRequestsRepositoryInMemory();
+    loansRepositoryInMemory = new LoansRepositoryInMemory();
     dateProvider = new DayjsDateProvider();
 
-    createLoanUseCase = new CreateLoanUseCase(
-      loansRepositoryInMemory,
-      contactsRepositoryInMemory,
-      dateProvider
-    );
+    approveLoanUseCase = new ApproveLoanUseCase(loansRepositoryInMemory);
 
-    createUserUseCase = new CreateUserUseCase(usersRepositoryInMemory);
     acceptContactRequestUseCase = new AcceptContactRequestUseCase(
       contactsRequestsRepositoryInMemory,
       contactsRepositoryInMemory
@@ -50,6 +53,12 @@ describe('Create Loan', () => {
       contactsRequestsRepositoryInMemory,
       usersRepositoryInMemory,
       contactsRepositoryInMemory
+    );
+    createUserUseCase = new CreateUserUseCase(usersRepositoryInMemory);
+    createLoanUseCase = new CreateLoanUseCase(
+      loansRepositoryInMemory,
+      contactsRepositoryInMemory,
+      dateProvider
     );
 
     const user = await createUser(createUserUseCase, 'test@example.com');
@@ -67,64 +76,38 @@ describe('Create Loan', () => {
       user.id
     );
 
+    const loan = await createLoan(
+      createLoanUseCase,
+      user.id,
+      contact.id,
+      dateProvider.addMonths(2)
+    );
+
     user_id = user.id;
     contact_id = contact.id;
+    loan_id = loan.id;
   });
 
-  it('should be able to create a loan', async () => {
-    const result = await createLoanUseCase.execute({
-      user_id,
-      contact_id,
-      value: 50,
-      type: 'pagar',
-      limit_date: dateProvider.addMonths(2)
+  it('should be able to approve a loan', async () => {
+    const result = await approveLoanUseCase.execute({
+      id: loan_id,
+      user_id: contact_id
     });
 
-    expect(result).toHaveProperty('id');
-    expect(result.payer_id).toEqual(user_id);
-    expect(result.receiver_id).toEqual(contact_id);
-    expect(result.value).toBe(50);
-    expect(result.status).toEqual('pendente');
+    expect(result).toBeUndefined();
   });
 
-  it('should be able to create a loan with fee', async () => {
-    const result = await createLoanUseCase.execute({
-      user_id,
-      contact_id,
-      value: 1000,
-      type: 'pagar',
-      fee: 1,
-      limit_date: dateProvider.addMonths(2)
-    });
-
-    expect(result).toHaveProperty('id');
-    expect(result.payer_id).toEqual(user_id);
-    expect(result.receiver_id).toEqual(contact_id);
-    expect(result.value).toBe(1020);
-    expect(result.status).toEqual('pendente');
-  });
-
-  it('should not be able to create a loan of a nonexistent contact', async () => {
+  it('should not be able to approve a nonexistent loan', async () => {
     await expect(
-      createLoanUseCase.execute({
-        user_id,
-        contact_id: '123',
-        value: 50,
-        type: 'pagar',
-        limit_date: dateProvider.addMonths(2)
-      })
-    ).rejects.toEqual(new AppError("You're not connected to this user"));
+      approveLoanUseCase.execute({ id: '123', user_id: contact_id })
+    ).rejects.toEqual(new AppError('Loan not found'));
   });
 
-  it('should not be able to create a loan with the value less than 1', async () => {
+  it('should not allow user that created the loan to approve it', async () => {
     await expect(
-      createLoanUseCase.execute({
-        user_id,
-        contact_id,
-        value: -10,
-        type: 'pagar',
-        limit_date: dateProvider.addMonths(2)
-      })
-    ).rejects.toEqual(new AppError('The minimum loan value is 1'));
+      approveLoanUseCase.execute({ id: loan_id, user_id })
+    ).rejects.toEqual(
+      new AppError('This user is not allowed to approve this loan', 401)
+    );
   });
 });

@@ -13,7 +13,8 @@ class LoansRepositoryInMemory implements ILoansRepository {
     value,
     type,
     fee,
-    limit_date
+    limit_date,
+    creator_id
   }: ICreateLoanDTO): Promise<Loan> {
     const loan = new Loan();
 
@@ -23,10 +24,11 @@ class LoansRepositoryInMemory implements ILoansRepository {
       value,
       type,
       fee,
-      status: 'aberto',
+      status: 'pendente',
       limit_date,
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
+      creator_id
     });
 
     this.loans.push(loan);
@@ -75,6 +77,12 @@ class LoansRepositoryInMemory implements ILoansRepository {
   async findById(id: string): Promise<Loan> {
     const loan = this.loans.find((loan) => loan.id === id);
     return loan;
+  }
+
+  async changeStatusById(id: string, status: string): Promise<void> {
+    const loan = this.loans.find((loan) => loan.id === id);
+
+    loan.status = status;
   }
 }
 

@@ -46,6 +46,13 @@ class Loan {
   limit_date: Date;
 
   @Column()
+  creator_id: string;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'creator_id' })
+  creator: User;
+
+  @Column()
   closed_at: Date;
 
   @CreateDateColumn()

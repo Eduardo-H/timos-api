@@ -9,9 +9,9 @@ interface ILoansRepository {
     value,
     type,
     fee,
-    limit_date
+    limit_date,
+    creator_id
   }: ICreateLoanDTO): Promise<Loan>;
-
   update({
     id,
     payer_id,
@@ -22,12 +22,10 @@ interface ILoansRepository {
     closed_at,
     status
   }: IUpdateLoanDTO): Promise<Loan>;
-
   deleteById(id: string): Promise<void>;
-
   listByUserId(user_id: string): Promise<Loan[]>;
-
   findById(id: string): Promise<Loan>;
+  changeStatusById(id: string, status: string): Promise<void>;
 }
 
 export { ILoansRepository };

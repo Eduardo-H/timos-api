@@ -18,16 +18,18 @@ class LoansRepository implements ILoansRepository {
     value,
     type,
     fee,
-    limit_date
+    limit_date,
+    creator_id
   }: ICreateLoanDTO): Promise<Loan> {
     const loan = this.repository.create({
       payer_id,
       receiver_id,
       value,
       fee,
-      status: 'aberto',
+      status: 'pendente',
       type,
-      limit_date
+      limit_date,
+      creator_id
     });
 
     await this.repository.save(loan);
@@ -75,6 +77,14 @@ class LoansRepository implements ILoansRepository {
   async findById(id: string): Promise<Loan> {
     const loan = await this.repository.findOne({ id });
     return loan;
+  }
+
+  async changeStatusById(id: string, status: string): Promise<void> {
+    const loan = await this.repository.findOne({ id });
+
+    loan.status = status;
+
+    this.repository.save(loan);
   }
 }
 

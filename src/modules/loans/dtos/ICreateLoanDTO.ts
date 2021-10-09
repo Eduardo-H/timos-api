@@ -5,6 +5,7 @@ interface ICreateLoanDTO {
   type: string;
   fee?: number;
   limit_date?: Date;
+  creator_id: string;
 }
 
 export { ICreateLoanDTO };
